@@ -1,86 +1,116 @@
 ---
-// component imports
-import {Icon} from "astro-icon/components";
-
 // data imports
 import {menu} from "../data/menu";
 
-// config import
-import {SITE} from "../config";
+// lib imports
+import {withBase, normalizePath} from "../lib/utils";
 
-const pathname = Astro.url.pathname;
+const current = normalizePath(Astro.url.pathname);
+const isActive = (href: string) => {
+    const target = normalizePath(href);
+    return target === '/' ? current === '/' : current.startsWith(target);
+};
 ---
 
-<nav class="bg-white dark:bg-n700 fixed w-full z-20 top-0 start-0 " id="menu">
-    <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-        <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-            <Icon name={SITE.logo} width={40} height={40}/>
-            <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-                { SITE.logoText}
-            </span>
+<header id="site-nav" class="fixed inset-x-0 top-0 z-40">
+    <nav class="container flex items-center justify-between py-4" aria-label="Main navigation">
+        <a href={withBase('/')} class="font-serif text-2xl tracking-tight" aria-label="Stan, back to home">
+            Stan<span class="text-gold" aria-hidden="true">.</span>
         </a>
-        <div class="flex md:order-1 space-x-3 md:space-x-0 rtl:space-x-reverse">
-            <button id="btn-menu" data-collapse-toggle="navbar-sticky" type="button"
-                    class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-                    aria-controls="navbar-sticky" aria-expanded="false">
+
+        <ul class="hidden items-center gap-8 md:flex">
+            {
+                menu.map((item) => (
+                    <li>
+                        <a
+                            href={withBase(item.href)}
+                            aria-current={isActive(item.href) ? 'page' : undefined}
+                            class:list={[
+                                'link-line font-mono text-xs uppercase tracking-[0.16em] transition-colors duration-200',
+                                isActive(item.href) ? 'text-gold' : 'text-muted hover:text-ink',
+                            ]}
+                        >
+                            {item.label}
+                        </a>
+                    </li>
+                ))
+            }
+            <li class="h-4 w-px bg-line" aria-hidden="true"></li>
+            <li>
+                <button
+                    type="button"
+                    data-theme-toggle
+                    aria-label="Switch to dark theme"
+                    class="flex h-11 w-11 items-center justify-center rounded-full text-muted transition-colors duration-200 hover:bg-ink/5 hover:text-ink dark:hover:bg-ink/10"
+                >
+                    <svg class="h-[18px] w-[18px] dark:hidden" aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+                    </svg>
+                    <svg class="hidden h-[18px] w-[18px] dark:block" aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+                    </svg>
+                </button>
+            </li>
+        </ul>
+
+        <div class="flex items-center gap-1 md:hidden">
+            <button
+                type="button"
+                data-theme-toggle
+                aria-label="Switch to dark theme"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-muted transition-colors hover:text-ink"
+            >
+                <svg class="h-[18px] w-[18px] dark:hidden" aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+                </svg>
+                <svg class="hidden h-[18px] w-[18px] dark:block" aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+                </svg>
+            </button>
+            <button
+                type="button"
+                data-menu-toggle
+                aria-expanded="false"
+                aria-controls="mobile-menu"
+                class="flex h-11 w-11 items-center justify-center rounded-md text-ink transition-colors hover:bg-ink/5 dark:hover:bg-ink/10"
+            >
                 <span class="sr-only">Open main menu</span>
-                <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                     viewBox="0 0 17 14">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M1 1h15M1 7h15M1 13h15"/>
+                <svg class="icon-open h-5 w-5" aria-hidden="true" viewBox="0 0 17 14" fill="none" stroke="currentColor"
+                     stroke-width="1.6" stroke-linecap="round">
+                    <path d="M1 1h15M1 7h15M1 13h15"></path>
+                </svg>
+                <svg class="icon-close hidden h-5 w-5" aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                    <path d="M18 6 6 18M6 6l12 12"></path>
                 </svg>
             </button>
         </div>
-        <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-2" id="navbar-sticky">
-            <ul class="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 dark:border-gray-700">
-                {
-                    menu.map((item) => (
-                            <li>
-                                <a
-                                        href={item.href}
-                                        class:list={{
-                                            ["block py-2 px-3 rounded md:p-0"]: true,
-                                            ["active"]: pathname === item.href,
-                                        }}>{item.label}
-                                </a>
-                            </li>
-                    ))
-                }
-            </ul>
-        </div>
+    </nav>
+
+    <div id="mobile-menu" class="border-t border-line bg-paper md:hidden">
+        <ul class="container flex flex-col py-4">
+            {
+                menu.map((item) => (
+                    <li>
+                        <a
+                            href={withBase(item.href)}
+                            aria-current={isActive(item.href) ? 'page' : undefined}
+                            class:list={[
+                                'flex min-h-[48px] items-center border-b border-line font-mono text-xs uppercase tracking-[0.16em] last:border-b-0',
+                                isActive(item.href) ? 'text-gold' : 'text-muted',
+                            ]}
+                        >
+                            {item.label}
+                        </a>
+                    </li>
+                ))
+            }
+        </ul>
     </div>
-</nav>
-
-<style>
-    .active {
-        @apply
-        text-light-theme
-        bg-n500
-
-        md:text-primary-light
-        md:bg-transparent
-
-        dark:text-primary-dark
-        dark:bg-dark-theme
-
-        md:dark:text-primary-dark
-        md:dark:bg-transparent
-    }
-</style>
-
-<script>
-    function toggleNav() {
-        // Toggle menu
-        const btnMenu = document.getElementById('btn-menu');
-        const navbar = document.getElementById('navbar-sticky');
-
-        btnMenu?.addEventListener('click', function () {
-            navbar?.classList.toggle('hidden');
-        });
-    }
-
-    toggleNav();
-
-    // Runs on view transitions navigation
-    document.addEventListener("astro:after-swap", toggleNav);
-</script>
+</header>

@@ -1,0 +1,72 @@
+---
+// components imports
+import Social from "./Social.astro";
+
+// lib imports
+import {withBase} from "../lib/utils";
+
+// library imports
+import type {ImageMetadata} from 'astro';
+import {Image} from 'astro:assets';
+
+// config import
+import {ME} from '@/config';
+
+/* Resolve the profile image from src/assets via glob (same mechanism the
+   template used), so swapping the photo only requires editing config.ts. */
+const imageName = ME.profileImage;
+const imagePath = `/src/assets/${imageName}`;
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/*.{jpeg,jpg,png,gif}');
+
+if (!images[imagePath]) {
+    throw new Error(`"${imagePath}" does not exist in glob "src/assets/*.{jpeg,jpg,png,gif}"`);
+}
+const profileImage = images[imagePath];
+
+const {email} = ME.contactInfo;
+---
+
+<section class="grid items-center gap-12 pb-16 pt-6 md:pb-24 md:pt-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+    <div class="flex flex-col items-start gap-6">
+        <p class="label-mono" data-reveal>{ME.profession}</p>
+
+        <h1 class="text-balance font-serif text-5xl leading-[1.08] tracking-tight md:text-7xl" data-reveal
+            style="--reveal-delay: 70ms">
+            Fine-tuning Android<br/>
+            at the <em class="italic text-gold">system level</em>.
+        </h1>
+
+        <p class="max-w-xl text-pretty text-base leading-relaxed text-muted md:text-lg" data-reveal
+           style="--reveal-delay: 140ms">
+            I'm Stan, a self-taught developer and university student from Indonesia. My Magisk and
+            KernelSU modules cover rendering performance, thermal behavior, network latency, and
+            idle battery drain.
+        </p>
+
+        <div class="flex flex-wrap items-center gap-4" data-reveal style="--reveal-delay: 210ms">
+            <a href={withBase('/projects')} class="btn-primary">View projects</a>
+            <a href={`mailto:${email}`} class="btn-ghost">Email me</a>
+        </div>
+
+        <div data-reveal style="--reveal-delay: 280ms">
+            <Social/>
+        </div>
+    </div>
+
+    <div class="relative mx-auto w-56 md:w-64 lg:ml-auto lg:w-full lg:max-w-[300px]" data-reveal
+         style="--reveal-delay: 160ms">
+        <!-- Single arch window with a gold hairline: explicit aspect ratio and
+             full-bleed image so no sub-pixel gaps show inside the frame. -->
+        <div class="aspect-square overflow-hidden rounded-t-full rounded-b-lg border border-gold">
+            <Image
+                    src={profileImage()}
+                    alt="Portrait of Stan"
+                    class="h-full w-full object-cover"
+                    loading="eager"
+                    decoding="async"
+                    fetchpriority="high"
+                    width={300}
+            />
+        </div>
+    </div>
+</section>

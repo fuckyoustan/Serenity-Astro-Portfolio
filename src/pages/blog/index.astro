@@ -1,9 +1,8 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import {getCollection} from 'astro:content';
-import {Image} from 'astro:assets';
-import ClockIcon from '@/icons/time-line.svg';
 import PostCard from "../../components/PostCard.astro";
+import {withBase} from "@/lib/utils";
 
 interface Post {
     id: string;
@@ -19,22 +18,19 @@ interface Post {
     };
 }
 
-
 const allPost = (await getCollection('posts'))
     .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
 ---
 
-<Layout title="John Doe | Portfolio | Blog" description="A list of my blog posts" scrollSmooth={false}>
-    <>
-        <!--Blog Section-->
-        <section class="border-bottom">
-            <div class="mb-4">
-                <h2 class="text-3xl font-bold mb-8">All My Blog Posts</h2>
-            </div>
-        </section>
+<Layout title="Blog | Stan" description="Writing about Android tuning and module development." scrollSmooth={false}>
+    <header class="pb-10 md:pb-14" data-reveal>
+        <p class="label-mono mb-3">Blog</p>
+        <h1 class="font-serif text-4xl tracking-tight md:text-6xl">Notes from the workshop.</h1>
+    </header>
 
-        <section class="flex flex-col gap-8">
-            {allPost.length > 0 ? (
+    <section aria-label="Blog posts">
+        {
+            allPost.length > 0 ? (
                 allPost.map((post: Post) => (
                         <PostCard
                                 id={post.id}
@@ -46,9 +42,15 @@ const allPost = (await getCollection('posts'))
                         />
                 ))
             ) : (
-                    <p>No posts found.</p>
+                <div class="flex flex-col items-center rounded-md border border-dashed border-line px-6 py-16 text-center" data-reveal>
+                    <p class="font-serif text-2xl">No posts yet</p>
+                    <p class="mt-2 max-w-sm text-sm leading-relaxed text-muted">
+                        I write occasionally about Android tuning and module development. Until the first
+                        post lands, the projects page tells the full story.
+                    </p>
+                    <a href={withBase('/projects')} class="btn-primary mt-6">Browse projects</a>
+                </div>
             )
-            }
-        </section>
-    </>
+        }
+    </section>
 </Layout>

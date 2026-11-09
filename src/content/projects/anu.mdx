@@ -1,6 +1,6 @@
 ---
 title: Acceleration N Utility (ANU)
-summary: A full-blown SurfaceFlinger dominator designed to throw your Android rendering into overdrive, obliterating lag and delivering buttery-smooth frames.
+summary: A Magisk module that tunes Android's SurfaceFlinger rendering pipeline for more consistent frame delivery and a more responsive interface.
 tags:
   - Magisk
   - SurfaceFlinger
@@ -11,45 +11,39 @@ endDate: 2026-04-19
 author: Stan
 url: https://github.com/fuckyoustan/Acceleration-N-Utility
 cover: './images/projects/anu.png'
-ogImage: './images/projects/og-anu.webp'
----
-
-## Table of Contents
-1. [Overview](#overview)
-2. [What Does It Do?](#what-does-it-do)
-3. [Why ANU?](#why-anu)
-4. [Installation](#installation)
-5. [Disclaimer](#disclaimer)
-
 ---
 
 ## Overview
-**ANU (Acceleration N Utility)** ain’t your average tweak—it’s a full-blown **SurfaceFlinger dominator**. This Magisk module takes your Android’s rendering system and throws it into overdrive. It is built for those who refuse to settle for stock settings and want to see their device perform at its absolute peak.
 
----
+ANU (Acceleration N Utility) is a Magisk module that works directly on Android's rendering stack. Instead of accepting the default SurfaceFlinger configuration, it adjusts the composition engine, frame timing, and input path so the interface delivers frames as steadily as the hardware allows.
 
-## What Does It Do?
-ANU brings a powerful set of optimizations to the table, targeting the core of Android's visual performance:
+It is aimed at users who keep a stock setup but still want their device's interface to run at full pace.
 
-- **⚡ SurfaceFlinger Boost:** Overhauls the composition engine for maximum throughput.
-- **🖼️ Frame Timing Optimization:** Ensures consistent frame delivery to eliminate stutters.
-- **🎨 HWUI Rendering Tweaks:** Accelerates hardware-accelerated UI tasks.
-- **🖱️ Touch Input Enhancement:** Reduces input latency for a more responsive feel.
-- **🚀 Animations Turbo:** Speeds up system animations without breaking visual integrity.
-- **💎 ART Runtime Boost:** Optimizes the Android Runtime for faster app execution.
-- **🔄 VSYNC & Refresh Rate Control:** Fine-tunes sync points for ultra-smooth scrolling.
+## What it does
 
----
+The module applies a set of optimizations that target the core of Android's visual performance:
 
-## Why ANU?
-Because stock settings are for normies. You want **raw speed**, **buttery frames**, and **no excuses**. ANU is here to obliterate lag and give your device that next-level smoothness you didn’t know was possible. It flexes your hardware's frames like a boss, making every interaction feel instantaneous.
+- SurfaceFlinger boost: raises the throughput of the composition engine.
+- Frame timing optimization: keeps frame delivery consistent to remove micro-stutters.
+- HWUI rendering tweaks: accelerates hardware-accelerated UI tasks.
+- Touch input enhancement: shortens input latency so the screen feels more responsive.
+- Animation tuning: speeds up system animations without breaking them.
+- ART runtime boost: optimizes the Android Runtime for faster app execution.
+- VSYNC and refresh rate control: fine-tunes sync points for smoother scrolling.
 
----
+## Why ANU
+
+Most rendering tweaks change one or two properties and hope for the best. ANU treats the rendering path as a whole: composition, timing, input, and runtime each get their own pass, and the settings are chosen to work together instead of fighting each other.
+
+The result is an interface that feels immediate, from scrolling to app launches.
 
 ## Installation
-1. Download the module from the [GitHub Repository](https://github.com/fuckyoustan/Acceleration-N-Utility).
-2. Flash the zip file via **Magisk Manager** or **KernelSU**.
-3. Reboot your device.
-4. Enjoy your frames bowing to your command.
 
----
+1. Download the module from the [GitHub repository](https://github.com/fuckyoustan/Acceleration-N-Utility).
+2. Flash the zip through Magisk or KernelSU.
+3. Reboot the device.
+4. The optimizations apply on boot; no further setup is needed.
+
+## Disclaimer
+
+The module modifies system-level rendering properties, and behavior can differ between ROMs and chipsets. Keep a backup before flashing, and check the repository's issue tracker if something looks off after a boot.

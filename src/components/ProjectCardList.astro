@@ -1,40 +1,51 @@
 ---
 // astro imports
-import { Image } from 'astro:assets';
+import {Image} from 'astro:assets';
+import {Icon} from "astro-icon/components";
 
-// library imports
-import {cn} from "../lib/utils";
+// lib imports
+import {withBase} from '../lib/utils';
 
-
-interface Props {
+interface Props extends Record<string, any> {
     title: string;
+    summary: string;
     tags: string[];
     cover: ImageMetadata;
     id: string;
+    index: number;
 }
 
-const { title, tags, cover, id } = Astro.props as Props;
+const {title, summary, tags, cover, id, index, ...rest} = Astro.props as Props;
 ---
 
-<a href={`/projects/${id}`} class="project-card" aria-label={`View project "${title}"`}>
-    <div class="flex flex-col md:flex-row md:items-center gap-6">
-        <div class="rounded-xl h-[250px] md:w-[150px] md:h-[150px] flex-none overflow-hidden">
-            <Image
-                    transition:name={`${id}-image`}
-                    src={cover}
-                    alt={`Cover preview of the project titled "${title}"`}
-                    class="object-cover w-full h-full rounded-xl"
-            />
-        </div>
-        <div class="flex flex-col gap-2 flex-1">
-            <p class="text-sm text-n500 dark:text-light-theme">
-                {tags.join(', ')}
-            </p>
-            <div class="flex items-center justify-between mb-2">
-                <h6 class={cn("font-semibold text-xl", "text-n500 dark:text-white")}>
-                    {title}
-                </h6>
-            </div>
-        </div>
+<a href={withBase(`/projects/${id}`)} aria-label={`View project: ${title}`}
+   class="group grid grid-cols-[2.5rem_1fr_auto] items-center gap-4 border-t border-line py-6 transition-colors duration-300 last:border-b hover:bg-surface/70 md:grid-cols-[3rem_9rem_1fr_3rem] md:gap-8 md:py-8"
+   {...rest}>
+    <span class="font-mono text-xs text-muted" aria-hidden="true">
+        {String(index).padStart(2, '0')}
+    </span>
+
+    <div class="hidden h-24 w-32 overflow-hidden rounded-md md:block">
+        <Image
+                transition:name={`${id}-image`}
+                src={cover}
+                alt={`Cover preview of ${title}`}
+                class="h-full w-full object-cover transition-transform duration-[600ms] ease-out group-hover:scale-[1.05]"
+                loading="lazy"
+                decoding="async"
+                width={256}
+        />
     </div>
+
+    <div class="flex min-w-0 flex-col gap-2">
+        <h2 class="truncate font-serif text-2xl tracking-tight transition-colors duration-300 group-hover:text-gold md:text-3xl">
+            {title}
+        </h2>
+        <p class="meta-mono truncate">{tags.join(' · ')}</p>
+        <p class="hidden max-w-xl text-sm leading-relaxed text-muted lg:block">{summary}</p>
+    </div>
+
+    <span class="flex h-11 w-11 items-center justify-center justify-self-end rounded-full border border-line text-muted opacity-0 transition-all duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 group-hover:border-gold group-hover:text-gold">
+        <Icon name="arrow-right-up-line" class="h-4 w-4" aria-hidden="true"/>
+    </span>
 </a>

@@ -1,0 +1,34 @@
+---
+// components imports
+import Social from "./Social.astro";
+
+// config import
+import {ME, SOCIALS} from '@/config';
+
+const {email} = ME.contactInfo;
+const github = SOCIALS.find((s) => s.name === 'GitHub');
+---
+
+<section class="border-t border-line py-16 md:py-28" id="contact">
+    <div class="mx-auto flex max-w-2xl flex-col items-center text-center" data-reveal>
+        <p class="label-mono mb-3">04 · Contact</p>
+        <h2 class="font-serif text-4xl leading-tight tracking-tight md:text-6xl">Have an idea for a module?</h2>
+        <p class="mt-5 max-w-md text-base leading-relaxed text-muted">
+            Bug reports, feature ideas, or questions about Android tuning: my inbox is open, and so are
+            the issue trackers on GitHub.
+        </p>
+        <div class="mt-8 flex flex-wrap justify-center gap-4">
+            <a href={`mailto:${email}`} class="btn-primary">Email me</a>
+            {
+                github && (
+                    <a href={github.url} target="_blank" rel="noopener noreferrer" class="btn-ghost">
+                        GitHub
+                    </a>
+                )
+            }
+        </div>
+        <div class="mt-8">
+            <Social/>
+        </div>
+    </div>
+</section>

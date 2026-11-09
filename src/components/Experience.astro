@@ -1,0 +1,37 @@
+---
+// data imports
+import workExperience from "@/data/Jobs.ts";
+import education from "@/data/education.ts";
+
+// components imports
+import JobDetails from "./JobDetails.astro";
+import EduDetail from "./EduDetail.astro";
+---
+
+<section class="border-t border-line py-16 md:py-24" id="experience">
+    <div class="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
+        <div data-reveal>
+            <p class="label-mono mb-3">03 · Experience</p>
+            <h2 class="font-serif text-3xl tracking-tight md:text-5xl">The road so far.</h2>
+        </div>
+
+        <div class="flex flex-col gap-14">
+            <div class="flex flex-col">
+                {
+                    workExperience.map((job) => (
+                        <JobDetails jobData={job}/>
+                    ))
+                }
+            </div>
+
+            <div class="flex flex-col">
+                <h3 class="meta-mono mb-6">Education</h3>
+                {
+                    education.map((edu) => (
+                        <EduDetail eduData={edu}/>
+                    ))
+                }
+            </div>
+        </div>
+    </div>
+</section>

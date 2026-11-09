@@ -1,6 +1,6 @@
 ---
 title: Force DeepSleep
-summary: A specialized power management module that forces Android into a deep sleep state when the screen is off, effectively eliminating idle battery drain.
+summary: A power-management module that pushes Android into deep sleep as soon as the screen turns off, cutting the idle battery drain that happens overnight.
 tags:
   - Magisk
   - Battery
@@ -11,54 +11,34 @@ endDate: 2026-04-19
 author: Stan
 url: https://github.com/fuckyoustan/Force-DeepSleep
 cover: './images/projects/dipslip.png'
-ogImage: './images/projects/og-deepsleep.webp'
----
-
-## Table of Contents
-1. [Overview](#overview)
-2. [Key Features](#key-features)
-3. [How It Works](#how-it-works)
-4. [Benefits](#benefits)
-5. [Installation](#installation)
-
 ---
 
 ## Overview
-**Force DeepSleep** is the ultimate solution for Android users struggling with "idle drain"—the annoying battery loss that happens while your phone is just sitting on your desk. This Magisk module ensures that your device's CPU and background processes enter the lowest possible power state (Deep Sleep) the moment you turn off the screen.
 
----
+Idle drain is the battery that disappears while the phone sits on a desk doing nothing. Force DeepSleep attacks exactly that: the moment the screen turns off, the module pushes the CPU and background processes into the lowest power state the hardware supports.
 
-## Key Features
-- **💤 Aggressive Doze Mode:** Forces the Android Doze mechanism to trigger almost instantly when the screen is locked.
-- **🚫 Wakelock Suppression:** Blocks unnecessary system wakelocks that prevent the CPU from resting.
-- **📊 Background Process Restriction:** Temporarily suspends non-critical background activities to maintain power efficiency.
-- **🔋 Battery Life Extension:** Significant reduction in percentage drops during overnight or long idle periods.
+## What it does
 
----
+- Aggressive Doze mode: triggers Android's Doze mechanism almost immediately after the screen locks.
+- Wakelock suppression: blocks unnecessary system wakelocks that keep the CPU awake.
+- Background process restriction: suspends non-critical background activity while the device sleeps.
+- Standby battery savings: noticeably smaller percentage drops during overnight and long idle periods.
 
-## How It Works
-The module utilizes shell scripts to modify the `device_idle` settings and `dumpsys deviceidle` parameters. It overrides the default system timers that usually wait for hours before entering Deep Sleep, reducing that wait time to just a few seconds.
+## How it works
 
-By fine-tuning the **Doze Mode** constants, Force DeepSleep makes the system "ignore" minor movement or insignificant sensors that would otherwise wake the device up.
+The module uses shell scripts to modify `device_idle` settings and `dumpsys deviceidle` parameters. Android normally waits hours before entering deep sleep; these timers are cut down to a few seconds.
 
----
+The Doze constants are then tuned so the system ignores minor movement and insignificant sensor events that would otherwise wake the device back up.
 
-## Benefits
-- **Optimized Standby:** Your battery percentage stays virtually the same even after hours of inactivity.
-- **Universal Support:** Works seamlessly across different ROMs (AOSP, MIUI, OxygenOS, etc.).
-- **Minimalist Footprint:** Extremely lightweight with zero impact on system performance when the screen is back on.
+## Compatibility
 
----
+- Works across ROM families, including AOSP, MIUI, and OxygenOS.
+- Zero measurable overhead when the screen is on; the module only acts while the device sleeps.
+- Pairs well with performance modules: full speed while in use, deep sleep when idle.
 
 ## Installation
-1. Download the module from the [GitHub Repository](https://github.com/fuckyoustan/Force-DeepSleep).
-2. Install via **Magisk** or **KernelSU**.
-3. Reboot your device.
-4. Enjoy a device that actually sleeps when you do.
 
----
-
-## Final Thoughts
-Force DeepSleep is designed for those who value longevity. It is the perfect companion for high-performance modules, ensuring that while your phone is powerful when you use it, it remains incredibly efficient when you don't.
-
----
+1. Download the module from the [GitHub repository](https://github.com/fuckyoustan/Force-DeepSleep).
+2. Install it through Magisk or KernelSU.
+3. Reboot the device.
+4. Lock the screen and let the phone actually rest.

@@ -1,12 +1,12 @@
 export const SITE = {
-    website: "https://fuckyoustan.vercel.app", 
-    title: "Stan Ganteng",
-    description: "Android system optimization, performance tweaks, and Magisk modules showcase.",
-    tags: ["Magisk", "KernelSU", "Android Tuning", "Astro"],
+    website: "https://fuckyoustan.vercel.app",
+    title: "Stan | Android Module Developer",
+    description: "Magisk and KernelSU modules for Android rendering, thermal, network, and battery performance. Portfolio of Stan, a self-taught developer from Indonesia.",
+    tags: ["Magisk", "KernelSU", "Android", "Performance", "Astro"],
     ogImage: "/og-image.webp",
     logo: "logo",
     logoText: "Stan.",
-    lang: "id",
+    lang: "en",
     favicon: "/favicon.png",
     repository: "https://github.com/fuckyoustan/Stan-Ganteng",
     author: "Stan",
@@ -14,48 +14,37 @@ export const SITE = {
 }
 
 export const ME = {
-    name: "@fuckyoustan",
-    profession: "Android Enthusiast & Module Developer",
-    profileImage: "pp2.png", // Pastikan foto kamu ada di folder public dengan nama ini
+    name: "Stan",
+    handle: "@fuckyoustan",
+    profession: "Android Module Developer",
+    profileImage: "pp2.png",
     profileFacts: [
         {
             value: 2,
-            description: "Years of Modding"
+            description: "Years of modding"
         },
         {
             value: 6,
-            description: "Projects Released"
+            description: "Projects released"
         },
         {
             value: 2683,
-            description: "Happy Users"
+            description: "Happy users"
         }
     ],
     contactInfo: {
         email: "fckyoustan666@gmail.com",
-        linkedin: "", 
+        linkedin: "",
         resumeDoc: "resume.pdf",
     },
-    aboutMe: "I am a self taught developer and university student from Indonesia with a deep interest in Android system level modifications. I focus on building Magisk and KernelSU modules.",
+    aboutMe: "I'm Stan, a self-taught developer and university student from Indonesia. I build Magisk and KernelSU modules that tune Android at the system level: rendering performance, thermal behavior, network latency, and idle battery drain. Everything I ship is open source and shaped by feedback from the people who use it."
 }
 
 export const SOCIALS = [
     {
-        name: "Twitter",
-        url: "https://x.com/mpiiess",
-        icon: "twitter-x-fill",
-        show: true
-    },
-    {
-        name: "Facebook",
-        url: "https://www.facebook.com/",
-        icon: "facebook-fill",
-        show: false
-    },
-    {
-        name: "Instagram",
-        url: "https://www.instagram.com/napiies_",
-        icon: "instagram-fill",
+        name: "GitHub",
+        url: "https://github.com/fuckyoustan",
+        icon: "github-fill",
         show: true
     },
     {
@@ -65,15 +54,27 @@ export const SOCIALS = [
         show: true
     },
     {
+        name: "X (Twitter)",
+        url: "https://x.com/mpiiess",
+        icon: "twitter-x-fill",
+        show: true
+    },
+    {
+        name: "Instagram",
+        url: "https://www.instagram.com/napiies_",
+        icon: "instagram-fill",
+        show: true
+    },
+    {
+        name: "Facebook",
+        url: "https://www.facebook.com/",
+        icon: "facebook-fill",
+        show: false
+    },
+    {
         name: "TikTok",
         url: "https://tiktok.com/",
         icon: "tik-fill",
         show: false
-    },
-    {
-        name: "GitHub",
-        url: "https://github.com/fuckyoustan",
-        icon: "github-fill",
-        show: true
     }
 ]

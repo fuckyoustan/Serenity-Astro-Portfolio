@@ -1,21 +1,18 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import ProfileInfo from "../components/ProfileInfo.astro";
-import ProfileActionButton from "../components/ProfileActionButton.astro";
-import TabsButtons from "../components/TabsButtons.tsx";
-import ProjectsCC from '@/components/ProjectsCC.astro';
-import AboutMeCC from "../components/AboutMeCC.astro";
-import ProfileFacts from "../components/ProfileFacts.astro";
+import Hero from "../components/Hero.astro";
+import Stats from "../components/Stats.astro";
+import SelectedWork from "../components/SelectedWork.astro";
+import About from "../components/About.astro";
+import Experience from "../components/Experience.astro";
+import Contact from "../components/Contact.astro";
 ---
 
-<Layout title="@fuckyoustan | Portfolio" description="A simple portfolio created with Astro." scrollSmooth={true}>
-    <>
-        <ProfileInfo/>
-        <ProfileFacts/>
-        <ProfileActionButton/>
-        <TabsButtons client:idle>
-            <ProjectsCC slot="portfolio"/>
-            <AboutMeCC slot="about"/>
-        </TabsButtons>
-    </>
+<Layout title="Stan | Android Module Developer" description="Magisk and KernelSU modules for Android rendering, thermal, network, and battery performance. Portfolio of Stan, a self-taught developer from Indonesia." scrollSmooth={true}>
+    <Hero/>
+    <Stats/>
+    <SelectedWork/>
+    <About/>
+    <Experience/>
+    <Contact/>
 </Layout>

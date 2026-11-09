@@ -1,0 +1,72 @@
+---
+// astro imports
+import {getCollection} from "astro:content";
+
+// components imports
+import ProjectCard from "./ProjectCard.astro";
+import {Icon} from "astro-icon/components";
+
+// lib imports
+import {withBase} from "../lib/utils";
+
+const allProjects = (await getCollection('projects'))
+    .sort((a, b) => b.data.startDate.getTime() - a.data.startDate.getTime());
+
+const [featured, ...rest] = allProjects;
+---
+
+<section class="py-16 md:py-24" id="work">
+    <div class="mb-10 flex flex-wrap items-end justify-between gap-6 md:mb-14" data-reveal>
+        <div>
+            <p class="label-mono mb-3">01 · Selected work</p>
+            <h2 class="font-serif text-3xl tracking-tight md:text-5xl">Modules, built and maintained.</h2>
+        </div>
+        <a href={withBase('/projects')}
+           class="link-line hidden shrink-0 font-mono text-xs uppercase tracking-[0.16em] text-muted transition-colors duration-200 hover:text-ink md:block">
+            All projects
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
+        {
+            featured && (
+                <ProjectCard
+                        id={featured.id}
+                        title={featured.data.title}
+                        summary={featured.data.summary}
+                        tags={featured.data.tags}
+                        cover={featured.data.cover}
+                        featured
+                        data-reveal
+                />
+            )
+        }
+
+        {
+            rest.map((project, i) => (
+                <ProjectCard
+                        id={project.id}
+                        title={project.data.title}
+                        summary={project.data.summary}
+                        tags={project.data.tags}
+                        cover={project.data.cover}
+                        data-reveal
+                        style={`--reveal-delay: ${((i + 1) % 2) * 90}ms`}
+                />
+            ))
+        }
+
+        <!-- The last grid cell becomes the archive link, balancing the grid -->
+        <a href={withBase('/projects')}
+           class="group flex flex-col justify-between gap-6 border border-line p-6 transition-colors duration-300 hover:border-gold/50"
+           data-reveal>
+            <p class="meta-mono">Archive</p>
+            <div class="flex items-end justify-between gap-4">
+                <p class="font-serif text-2xl leading-snug">Every module,<br/> release notes included.</p>
+                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line text-muted transition-all duration-300 group-hover:border-gold group-hover:text-gold">
+                    <Icon name="arrow-right-up-line" class="h-4 w-4" aria-hidden="true"/>
+                </span>
+            </div>
+        </a>
+    </div>
+</section>

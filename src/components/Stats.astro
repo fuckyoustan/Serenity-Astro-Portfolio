@@ -1,0 +1,26 @@
+---
+// config import
+import { ME } from '@/config'
+
+const { profileFacts } = ME
+---
+
+<section class="border-y border-line" aria-label="Profile in numbers">
+    <dl class="grid grid-cols-1 divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        {
+            profileFacts.map((fact, i) => (
+                <div
+                    class="flex flex-col items-center gap-1.5 py-8 sm:py-10"
+                    data-reveal
+                    style={`--reveal-delay: ${i * 90}ms`}
+                >
+                    <dd class="font-serif text-4xl leading-none tracking-tight md:text-5xl">
+                        <span data-count={fact.value}>{fact.value.toLocaleString('en-US')}</span><span
+                        class="text-gold">+</span>
+                    </dd>
+                    <dt class="meta-mono">{fact.description}</dt>
+                </div>
+            ))
+        }
+    </dl>
+</section>

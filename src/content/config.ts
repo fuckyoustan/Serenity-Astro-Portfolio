@@ -32,9 +32,9 @@ const projects = defineCollection({
         url: z.string(),
         cover: image(),
         tags: z.array(z.string()),
-        ogImage: z.string()
+        ogImage: z.string().optional()
     }),
 });
 
-// 4. Export a single `collections` object to register your collection(s)
-export const collections = {  projects, posts };
+// 4. Export a single `collections` object to register all collections
+export const collections = { projects, posts };

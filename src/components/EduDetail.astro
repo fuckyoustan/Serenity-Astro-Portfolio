@@ -1,7 +1,4 @@
 ---
-// component imports
-import {Badge} from "./ui/badge";
-
 // lib imports
 import {formatDatetime} from "../lib/utils";
 
@@ -15,7 +12,7 @@ interface Edu {
     currentUni: boolean;
 }
 
-const {eduData} = Astro.props;  // Ensure correct typing for the props
+const {eduData} = Astro.props as { eduData: Edu };
 const {
     title,
     school,
@@ -23,19 +20,18 @@ const {
     startDate,
     endDate,
     description,
-    currentUni
-} = eduData as Edu;
+    currentUni,
+} = eduData;
 ---
 
-<div class="flex flex-col gap-2">
-    <Badge className="bg-primary-light dark:bg-primary-dark w-fit rounded-md">
-        {formatDatetime(startDate)} - {currentUni ? "Present" : formatDatetime(endDate)}
-    </Badge>
-    <h3 class="text-xl font-bold">{title}</h3>
-    <div class="flex gap-2">
-        <p>{school}</p>
-        <span>/</span>
-        <p>{location}</p>
-    </div>
-    <p>{description}</p>
+<div class="relative border-l border-line pb-12 pl-8 last:pb-0">
+    <span class="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border border-gold bg-paper"
+          aria-hidden="true"></span>
+
+    <p class="meta-mono">
+        {formatDatetime(startDate)} – {currentUni ? 'Present' : formatDatetime(endDate)}
+    </p>
+    <h3 class="mt-2 font-serif text-2xl tracking-tight">{title}</h3>
+    <p class="mt-1 text-sm text-gold">{school} · {location}</p>
+    <p class="mt-3 max-w-lg text-sm leading-relaxed text-muted">{description}</p>
 </div>

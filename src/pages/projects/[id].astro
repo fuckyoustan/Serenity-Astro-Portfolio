@@ -1,10 +1,10 @@
-
 ---
 import { getCollection, render } from "astro:content";
 import { Image } from "astro:assets";
+import { Icon } from "astro-icon/components";
 import Layout from "../../layouts/Layout.astro";
-import BackBtn from "@/components/BackBtn.astro";
 import BackToTop from "../../components/BackToTop.astro";
+import { formatDatetime, withBase } from "@/lib/utils";
 
 export async function getStaticPaths() {
     const posts = await getCollection('projects');
@@ -15,40 +15,44 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { title, summary, tags, cover, ogImage, url } = post.data;
+const { title, summary, tags, cover, url, startDate, endDate } = post.data;
 
 const { Content } = await render(post);
-
 ---
-<Layout title={title} description={summary} imageOg={ogImage} scrollSmooth={true}>
-    <>
-        <div class="flex justify-center mt-10">
-            <BackBtn/>
-        </div>
-        <div class="flex flex-col gap-6 justify-center items-center">
-            <h1 class="text-3xl font-bold text-center">{title}</h1>
-            <p class="text-sm text-n500 dark:text-primary-light ">
-                {tags.join(', ')}
-            </p>
-        </div>
-        <Image transition:name={`${post.id}-image`} class="rounded-2xl" src={cover} alt="Main project image"/>
-        <p>
-            {summary}
-        </p>
-        <a href={url}>
-            Visit the project ↗
-        </a>
 
-        <article id="article" class="mt-8 prose dark:prose-invert">
+<Layout title={`${title} | Stan`} description={summary} imageOg={withBase(cover.src)} scrollSmooth={true}>
+    <article class="flex flex-col">
+        <header class="flex flex-col items-start gap-5 pb-10 md:pb-14" data-reveal>
+            <a href={withBase('/projects')}
+               class="link-line font-mono text-xs uppercase tracking-[0.16em] text-muted transition-colors duration-200 hover:text-ink">
+                All projects
+            </a>
+            <h1 class="max-w-3xl font-serif text-4xl leading-tight tracking-tight md:text-6xl">{title}</h1>
+            <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+                <p class="meta-mono">{tags.join(' · ')}</p>
+                <p class="meta-mono" aria-label="Active development period">
+                    {formatDatetime(startDate)} – {formatDatetime(endDate)}
+                </p>
+            </div>
+        </header>
+
+        <div class="overflow-hidden rounded-md border border-line" data-reveal style="--reveal-delay: 90ms">
+            <Image transition:name={`${post.id}-image`} class="h-auto w-full object-cover" src={cover}
+                   alt={`Main image for ${title}`} width={1160} decoding="async"/>
+        </div>
+
+        <div class="mt-10 flex flex-col gap-6" data-reveal style="--reveal-delay: 120ms">
+            <p class="max-w-2xl text-lg leading-relaxed text-muted">{summary}</p>
+            <a href={url} target="_blank" rel="noopener noreferrer" class="btn-ghost w-fit">
+                View on GitHub
+                <Icon name="arrow-right-up-line" class="h-4 w-4" aria-hidden="true"/>
+            </a>
+        </div>
+
+        <div class="prose mt-14 max-w-2xl" data-reveal style="--reveal-delay: 150ms">
             <Content/>
-        </article>
-        <BackToTop />
-    </>
+        </div>
+
+        <BackToTop/>
+    </article>
 </Layout>
-
-<style is:global>
-    h2 {
-        @apply text-2xl font-bold my-4;
-    }
-</style>
-

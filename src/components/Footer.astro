@@ -1,6 +1,24 @@
 ---
+// components imports
+import Social from "./Social.astro";
 
+// lib imports
+import {withBase} from "../lib/utils";
+
+const year = new Date().getFullYear();
 ---
-<footer class="container py-4 text-center">
-  <p>Made with ❤️ by <a href="https://github.com/fuckyoustan" target="_blank" rel="noopener noreferrer">@fuckyoustan</a>.</p>
+
+<footer class="border-t border-line">
+    <div class="container flex flex-col items-center justify-between gap-6 py-10 md:flex-row">
+        <div class="flex flex-col items-center gap-1.5 md:items-start">
+            <a href={withBase('/')} class="font-serif text-xl tracking-tight" aria-label="Stan, back to home">
+                Stan<span class="text-gold" aria-hidden="true">.</span>
+            </a>
+            <p class="meta-mono">Android modules · Magisk · KernelSU</p>
+        </div>
+
+        <Social/>
+
+        <p class="font-mono text-[11px] text-muted">© {year} Stan · Built with Astro</p>
+    </div>
 </footer>

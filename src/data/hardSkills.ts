@@ -7,22 +7,22 @@ interface HardSkill {
 const hardSkills: HardSkill[] = [
   {
     name: "Bash",
-    description: "Expert in automation, system-level scripting, and Android optimization.",
+    description: "Automation and system-level scripting for Android optimization.",
     icon: "bash"
   },
   {
     name: "HTML",
-    description: "Building the core structure of responsive WebUIs for Android modules.",
+    description: "Structuring the responsive WebUIs that configure my modules.",
     icon: "html"
   },
   {
     name: "CSS",
-    description: "Designing modern interfaces with Material Design 3 and fluid layouts.",
+    description: "Styling module interfaces with Material Design 3 and fluid layouts.",
     icon: "css"
   },
   {
     name: "JavaScript",
-    description: "Implementing interactive logic and real-time data for web-based tools.",
+    description: "Interactive logic and real-time data for web-based tools.",
     icon: "javascript"
   }
 ];

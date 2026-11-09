@@ -1,6 +1,6 @@
 ---
 title: Ultimate Rendering Optimization
-summary: A powerful Magisk module designed to eliminate UI bottlenecks by forcing advanced rendering threads and optimizing system composition for a buttery-smooth experience.
+summary: A Magisk module that forces threaded Skia rendering and removes composition overhead, for an interface that stays smooth under load.
 tags:
   - Magisk
   - GPU Rendering
@@ -11,51 +11,34 @@ endDate: 2026-04-19
 author: Stan
 url: https://github.com/fuckyoustan/Ultimate-Rendering-Optimization
 cover: './images/projects/render.png'
-ogImage: './images/projects/og-ultimate-render.webp'
----
-
-## Table of Contents
-1. [Overview](#overview)
-2. [Key Features](#key-features)
-3. [Technical Deep Dive](#technical-deep-dive)
-4. [Safety & Warnings](#safety-and-warnings)
-5. [Final Words](#final-words)
-
 ---
 
 ## Overview
-**Ultimate Rendering Optimization** is more than just a tweak—it is a declaration of war on janky rendering and laggy UIs. This Magisk module is built to kick Android performance bottlenecks right in the face, making your interface glide like butter on a hot pan. 
 
-If you are tired of animations looking like a PowerPoint slideshow, this module is your ultimate solution.
+Ultimate Rendering Optimization attacks UI jank at its source. When animations stutter and scrolling hesitates, the cause is usually rendering work landing on the wrong thread, or a composition pipeline carrying overhead it does not need. This module reworks both.
 
----
+## What it does
 
-## Key Features
-- **🚀 Advanced Threading:** Forces **SkiaGL Threaded** and **SkiaVK Threaded** rendering to utilize multi-core processing for visual tasks.
-- **⚡ Version Tuning:** Strategic adjustment of OpenGL ES versions to maximize compatibility and speed.
-- **🧹 Composition Cleanup:** Disables useless system composition overhead that slows down your GPU.
-- **📦 Smart Caching:** Implements custom render cache sizes to ensure assets are ready exactly when the system needs them.
-- **🌀 Fluid Animations:** Stabilizes frame times for a consistently smooth user experience across the entire OS.
+- Advanced threading: forces SkiaGL Threaded and SkiaVK Threaded rendering, so visual work spreads across multiple cores.
+- Version tuning: adjusts OpenGL ES versions strategically to balance compatibility and speed.
+- Composition cleanup: disables system composition overhead that slows the GPU down.
+- Smart caching: sets custom render cache sizes so assets are ready exactly when the system needs them.
+- Frame time stabilization: keeps frame delivery even, which is what makes motion read as smooth.
 
----
+## How it works
 
-## Technical Deep Dive
-The module achieves its performance gains by injecting specialized system properties (`setprop`) and modifying the hardware acceleration configuration. 
+The module injects system properties (`setprop`) and modifies the hardware acceleration configuration.
 
-By forcing the **Skia** pipeline to run in threaded mode, the module offloads heavy UI rendering from the main thread, significantly reducing "jank" and improving touch responsiveness. It also optimizes the surface flinger's behavior to ensure that every frame is delivered with precision.
+Forcing the Skia pipeline into threaded mode offloads heavy UI rendering from the main thread, which reduces jank and improves touch responsiveness. SurfaceFlinger's behavior is tuned as well, so frames are delivered on schedule instead of in bursts.
 
----
+## Safety and warnings
 
-## Warnings
-> [!WARNING]
-> This module is designed for enthusiasts who push their devices to the limit. 
-> - **Backup your data:** Always have a recovery plan or a NANDroid backup.
-> - **Compatibility:** While designed to be universal, system-level mods can behave differently across various ROMs.
-> - **Responsibility:** You are responsible for your own device. Proceed with the spirit of a true modder.
+> **Warning:** this module is aimed at enthusiasts who push their devices hard.
+>
+> - Keep a recovery plan or a NANDroid backup within reach.
+> - System-level mods can behave differently across ROMs, even when designed to be universal.
+> - Your device is your responsibility. Proceed like a modder: with a backup ready.
 
----
+## Final words
 
-## Final Words
-Ultimate Rendering Optimization isn't just about speed; it's about a seamless interaction between you and your device. It is built for those who value aesthetics and performance in equal measure. Stop settling for "good enough" and start experiencing what your hardware is truly capable of.
-
----
+Smoothness is not only about raw speed; it is the feeling that nothing stands between your input and the screen. If "good enough" is not your standard, this module is the one to try.

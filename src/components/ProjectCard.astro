@@ -1,29 +1,66 @@
 ---
 // astro imports
 import {Image} from "astro:assets";
+import {Icon} from "astro-icon/components";
 
-const { title, tags, cover, id } = Astro.props;
+// lib imports
+import {withBase} from "../lib/utils";
+
+interface Props extends Record<string, any> {
+    id: string;
+    title: string;
+    summary: string;
+    tags: string[];
+    cover: ImageMetadata;
+    featured?: boolean;
+}
+
+const {
+    id,
+    title,
+    summary,
+    tags,
+    cover,
+    featured = false,
+    ...rest
+} = Astro.props as Props;
 ---
-<a href={`/projects/${id}`}>
-    <div class="relative flex flex-col text-gray-700 bg-clip-border rounded-xl w-full">
-        <div class="relative overflow-hidden rounded-xl h-52">
-            <Image
-                    transition:name={ `${id}-image` }
-                    src={cover}
-                    alt={"cover preview of " + title}
-                    class={"object-cover w-full h-full rounded-xl"}
-                    loading={'eager'}
-            />
-        </div>
-        <div class="px-2 py-4 flex flex-col gap-2">
-            <p class="text-sm  text-n500 dark:text-light-theme ">
-                {tags.join(', ')}
-            </p>
-            <div class="flex items-center justify-between mb-2">
-                <h4 class="font-semibold text-xl text-n500 dark:text-white ">
-                    {title}
-                </h4>
-            </div>
-        </div>
+
+<a
+        href={withBase(`/projects/${id}`)}
+        aria-label={`View project: ${title}`}
+        class:list={[
+            'group relative flex flex-col gap-5 border border-line bg-surface p-4 transition-colors duration-300 hover:border-gold/50',
+            featured && 'md:col-span-2 md:flex-row md:items-stretch md:gap-8 md:p-6',
+        ]}
+        {...rest}
+>
+    <div
+            class:list={[
+                'relative overflow-hidden rounded-md',
+                featured ? 'aspect-[16/10] md:aspect-auto md:min-h-[280px] md:w-[55%]' : 'aspect-[16/10]',
+            ]}
+    >
+        <Image
+                transition:name={`${id}-image`}
+                src={cover}
+                alt={`Cover preview of ${title}`}
+                class="h-full w-full object-cover transition-transform duration-[600ms] ease-out group-hover:scale-[1.04]"
+                loading={featured ? 'eager' : 'lazy'}
+                decoding="async"
+                width={featured ? 960 : 640}
+        />
+    </div>
+
+    <div class:list={['flex flex-col gap-3', featured && 'justify-center md:py-6 md:pr-4']}>
+        <p class="meta-mono">{tags.slice(0, 3).join(' · ')}</p>
+        <h3 class:list={['font-serif leading-snug tracking-tight', featured ? 'text-3xl md:text-4xl' : 'text-2xl']}>
+            {title}
+        </h3>
+        {featured && <p class="max-w-md text-sm leading-relaxed text-muted">{summary}</p>}
+        <span
+                class="mt-1 inline-flex -translate-x-1 items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-gold opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100">
+            View project <Icon name="arrow-right-up-line" class="h-3.5 w-3.5" aria-hidden="true"/>
+        </span>
     </div>
 </a>

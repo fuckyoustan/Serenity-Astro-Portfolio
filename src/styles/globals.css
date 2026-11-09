@@ -1,69 +1,248 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ------------------------------------------------------------------ */
+/* Design tokens                                                       */
+/* Light: warm ivory paper, near-black ink, antique gold accent.       */
+/* Dark: warm charcoal, off-white ink, softened gold.                  */
+/* All text/background pairs verified against WCAG AA (4.5:1).         */
+/* ------------------------------------------------------------------ */
 @layer base {
     :root {
-        --radius: 0.5rem
+        --c-paper: 247 244 238;
+        --c-surface: 255 255 255;
+        --c-ink: 26 24 21;
+        --c-muted: 87 83 74;
+        --c-line: 227 221 209;
+        --c-gold: 138 106 27;
+        --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+        color-scheme: light;
+    }
+
+    .dark {
+        --c-paper: 19 17 16;
+        --c-surface: 27 25 23;
+        --c-ink: 237 232 223;
+        --c-muted: 168 160 153;
+        --c-line: 46 42 38;
+        --c-gold: 201 169 97;
+        color-scheme: dark;
+    }
+
+    html {
+        scroll-behavior: smooth;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        @apply bg-paper text-ink font-sans antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    ::selection {
+        background: rgb(var(--c-gold) / 0.22);
+    }
+
+    /* Affordance + visible focus for every control */
+    a, button, summary, label, select { cursor: pointer; }
+    button:disabled { cursor: not-allowed; }
+
+    :focus-visible {
+        outline: 2px solid rgb(var(--c-gold));
+        outline-offset: 3px;
+        border-radius: 1px;
+    }
+
+    /* Non-essential motion stops here */
+    @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
     }
 }
 
-main {
-    @apply flex-grow;
+/* ------------------------------------------------------------------ */
+/* Scroll reveal (progressive enhancement)                             */
+/* Fade-up 18px over ~550ms with per-element stagger delay.            */
+/* Without JS (html lacks .js) everything simply stays visible.        */
+/* ------------------------------------------------------------------ */
+.js [data-reveal] {
+    opacity: 0;
+    transform: translateY(18px);
 }
 
-/* Base prose styling */
-/* Customize .prose directly */
+.js [data-reveal].is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+        opacity 0.55s var(--ease-out),
+        transform 0.55s var(--ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .js [data-reveal],
+    .js [data-reveal].is-revealed {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
+@layer components {
+    /* Mono micro-label: the repeating editorial motif for section
+       markers and metadata. */
+    .label-mono {
+        @apply font-mono text-[11px] uppercase tracking-[0.16em] text-gold;
+    }
+
+    .meta-mono {
+        @apply font-mono text-[11px] uppercase tracking-[0.16em] text-muted;
+    }
+
+    /* Animated underline that grows from the left */
+    .link-line {
+        background-image: linear-gradient(currentColor, currentColor);
+        background-size: 0% 1px;
+        background-position: 0 100%;
+        background-repeat: no-repeat;
+        padding-bottom: 2px;
+        transition: background-size 0.4s var(--ease-out);
+    }
+    .link-line:hover,
+    .link-line:focus-visible,
+    .link-line[aria-current="page"] {
+        background-size: 100% 1px;
+    }
+
+    /* Buttons: ink fills invert against the paper; gold on hover. */
+    .btn-primary {
+        @apply inline-flex h-12 items-center justify-center gap-2 rounded-md bg-ink px-7 text-sm font-medium tracking-wide text-paper transition-all duration-200 hover:-translate-y-0.5 hover:bg-gold;
+    }
+
+    .btn-ghost {
+        @apply inline-flex h-12 items-center justify-center gap-2 rounded-md border border-ink/25 px-7 text-sm font-medium tracking-wide text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-gold hover:text-gold dark:border-muted/50;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Navbar behavior: hairline + glass when scrolled, hides on scroll    */
+/* down and returns on scroll up. The navbar is the single element     */
+/* allowed to use backdrop blur.                                       */
+/* ------------------------------------------------------------------ */
+#site-nav {
+    border-bottom: 1px solid transparent;
+    transition:
+        transform 0.3s var(--ease-out),
+        background-color 0.3s linear,
+        border-color 0.3s linear;
+}
+
+#site-nav.is-scrolled {
+    background-color: rgb(var(--c-paper) / 0.86);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom-color: rgb(var(--c-line));
+}
+
+#site-nav.is-hidden {
+    transform: translateY(-100%);
+}
+
+/* Mobile menu panel */
+#mobile-menu {
+    display: none;
+}
+
+#mobile-menu.open {
+    display: block;
+    animation: menu-in 0.22s var(--ease-out);
+}
+
+/* Hamburger becomes a close (X) affordance while the panel is open */
+[data-menu-toggle].menu-open .icon-open {
+    display: none;
+}
+
+[data-menu-toggle].menu-open .icon-close {
+    display: block;
+}
+
+@keyframes menu-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Prose (MDX project pages)                                           */
+/* ------------------------------------------------------------------ */
 .prose {
-    color: theme('colors.n700');
-    --tw-prose-headings: theme('colors.n700');
-    --tw-prose-p: theme('colors.n700');
-    --tw-prose-a: theme('colors.primary-light');
-    --tw-prose-a-hover: theme('colors.primary-hover-light');
-    --tw-prose-blockquote: theme('colors.n500');
-    --tw-prose-figcaption: theme('colors.n500');
-    --tw-prose-strong: theme('colors.n700');
-    --tw-prose-code: theme('colors.n700');
-    --tw-prose-ol: theme('colors.n700');
-    --tw-prose-ul: theme('colors.n700');
-    --tw-prose-li-marker: theme('colors.n500');
-    --tw-prose-img: theme('colors.n700');
-    --tw-prose-hr: theme('colors.n500');
-}
-
-/* Dark mode customization */
-@media (prefers-color-scheme: dark) {
-    .prose {
-        color: theme('colors.n200');
-        --tw-prose-headings: theme('colors.light-theme');
-        --tw-prose-p: theme('colors.light-theme');
-        --tw-prose-a: theme('colors.primary-dark');
-        --tw-prose-a-hover: theme('colors.primary-hover-dark');
-        --tw-prose-blockquote: theme('colors.n500');
-        --tw-prose-figcaption: theme('colors.light-theme');
-        --tw-prose-strong: theme('colors.light-theme');
-        --tw-prose-code: theme('colors.light-theme');
-        --tw-prose-ol: theme('colors.light-theme');
-        --tw-prose-ul: theme('colors.light-theme');
-        --tw-prose-li-marker: theme('colors.n500');
-        --tw-prose-img: theme('colors.light-theme');
-        --tw-prose-hr: theme('colors.n500');
-    }
+    --tw-prose-body: rgb(var(--c-ink) / 0.86);
+    --tw-prose-headings: rgb(var(--c-ink));
+    --tw-prose-lead: rgb(var(--c-muted));
+    --tw-prose-links: rgb(var(--c-gold));
+    --tw-prose-bold: rgb(var(--c-ink));
+    --tw-prose-counters: rgb(var(--c-muted));
+    --tw-prose-bullets: rgb(var(--c-gold));
+    --tw-prose-hr: rgb(var(--c-line));
+    --tw-prose-quotes: rgb(var(--c-muted));
+    --tw-prose-quote-borders: rgb(var(--c-gold));
+    --tw-prose-captions: rgb(var(--c-muted));
+    --tw-prose-code: rgb(var(--c-ink));
+    --tw-prose-pre-code: #e6edf3;
+    --tw-prose-pre-bg: #161822;
+    --tw-prose-th-borders: rgb(var(--c-line));
+    --tw-prose-td-borders: rgb(var(--c-line));
 }
 
 .prose img {
-    @apply rounded-2xl;
+    @apply rounded-md;
 }
 
-/* Icon Animations */
-.cv-btn:hover .animate-slide-right {
-    animation: slide-right 0.5s cubic-bezier(1, -.43, .68, .57) infinite alternate both !important;
+.prose a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
 }
 
-.li-btn:hover .linkedin-anim {
-    animation: linkedin 2s infinite both cubic-bezier(1, -.08, 0, 1.12);
+.prose a:hover {
+    text-decoration-color: rgb(var(--c-gold));
 }
 
-/* Code Block Styles */
+.prose h2 {
+    @apply font-serif tracking-tight;
+}
+
+.prose hr {
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+}
+
+/* Callout-style blockquotes (safety warnings on project pages) */
+.prose blockquote {
+    border-left: 2px solid rgb(var(--c-gold));
+    border-radius: 0 6px 6px 0;
+    background-color: rgb(var(--c-surface));
+    padding: 1rem 1.5rem;
+    font-style: normal;
+    color: rgb(var(--c-muted));
+}
+
+.prose blockquote strong {
+    color: rgb(var(--c-ink));
+}
+
+/* Code blocks */
 pre {
     position: relative;
     z-index: 1;
@@ -71,6 +250,8 @@ pre {
     padding: 1.25rem 0;
     background: transparent;
     overflow-x: auto;
+    border: 1px solid rgb(var(--c-line));
+    border-radius: 6px;
 }
 
 code {
@@ -81,4 +262,9 @@ code {
     line-height: 1.7;
     font-size: 0.875rem;
     transition: color 0.5s;
+}
+
+.prose code::before,
+.prose code::after {
+    content: "";
 }

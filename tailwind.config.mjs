@@ -1,42 +1,42 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-    darkMode: ['media'],
+    // Class-based dark mode so the theme toggle in the navbar can switch it.
+    darkMode: ['class'],
     content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
-	theme: {
-		container: {
-			center: true,
-			screens: {
-				sm: "100%",
-				md: "100%",
-				lg: "520px",
-				xl: "620px"
-			},
-			padding: '2rem',
-		},
-    	extend: {
-    		borderRadius: {
-    			lg: 'var(--radius)',
-    			md: 'calc(var(--radius) - 2px)',
-    			sm: 'calc(var(--radius) - 4px)'
-    		},
-			colors: {
-				// Light mode colors (Pink-focused)
-				'light-theme': '#FDF8F9', // Background yang lebih lembut senada pink
-				'primary-light': '#F06292', // Warna pink dari logo.svg
-				'primary-hover-light': '#F48FB1', // Pink yang lebih terang untuk hover
-
-				// Dark mode colors (Pink-focused)
-				'dark-theme': '#0C151D', // Background gelap dengan tint pink/maroon MD3
-				'primary-dark': '#F48FB1', // Pink terang untuk aksesibilitas di mode gelap
-				'primary-hover-dark': '#F06292', // Pink logo untuk hover di mode gelap
-
-				// Neutrals (Tetap pertahankan atau sesuaikan sedikit ke arah cold-grey)
-				'n200': '#d7d9da',
-				'n900': '#222222',
-				'n700': '#171F26',
-				'n500': '#555555',
-			},
-    	}
+    theme: {
+        container: {
+            center: true,
+            screens: {
+                sm: "100%",
+                md: "100%",
+                lg: "1080px",
+                xl: "1160px"
+            },
+            padding: {
+                DEFAULT: '1.5rem',
+                md: '2.5rem',
+            },
+        },
+        extend: {
+            fontFamily: {
+                // Editorial serif for display type: the "elegant" half of the identity.
+                serif: ['"Playfair Display"', 'Georgia', 'serif'],
+                // Warm geometric sans for body: readable, and not an AI-default pick.
+                sans: ['Manrope', 'system-ui', '-apple-system', 'sans-serif'],
+                // Mono for micro-labels and metadata: the editorial gallery motif.
+                mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+            },
+            colors: {
+                // Semantic tokens (RGB channels) so light and dark themes stay
+                // complete and consistent by construction.
+                paper: 'rgb(var(--c-paper) / <alpha-value>)',
+                surface: 'rgb(var(--c-surface) / <alpha-value>)',
+                ink: 'rgb(var(--c-ink) / <alpha-value>)',
+                muted: 'rgb(var(--c-muted) / <alpha-value>)',
+                line: 'rgb(var(--c-line) / <alpha-value>)',
+                gold: 'rgb(var(--c-gold) / <alpha-value>)',
+            },
+        },
     },
-	plugins: [require("tailwindcss-animate"), require('@tailwindcss/typography')],
+    plugins: [require("tailwindcss-animate"), require('@tailwindcss/typography')],
 }

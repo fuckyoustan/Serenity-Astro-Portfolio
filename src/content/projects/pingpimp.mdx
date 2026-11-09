@@ -1,6 +1,6 @@
 ---
 title: PingPimp
-summary: A high-performance network optimization module for Android designed to reduce latency, stabilize ping, and optimize the TCP/IP stack for an elite gaming experience.
+summary: A network optimization module that prioritizes game traffic, tightens the TCP stack, and manages encrypted DNS to keep ping stable on Android.
 tags:
     - Magisk
     - KernelSU
@@ -11,70 +11,47 @@ endDate: 2026-04-19
 author: fuckyoustan
 url: https://github.com/fuckyoustan/PingPimp
 cover: './images/projects/pingpimp.png'
-ogImage: ''
----
-
-## Table of Contents
-1. [Overview](#overview)
-2. [Key Features](#key-features)
-3. [Technical Implementation](#technical-implementation)
-4. [User Benefits](#user-benefits)
-5. [Installation](#installation)
-6. [Final Thoughts](#final-thoughts)
-
 ---
 
 ## Overview
-**PingPimp** is a specialized Magisk and KernelSU module built for Android power users and mobile gamers. In an era where online gaming demands near-instantaneous data transmission, PingPimp bridges the gap by fine-tuning the internal Android networking subsystem. 
 
-The goal was simple: to create a "set-and-forget" solution that pimp-up your connection quality without needing complex manual configurations.
+PingPimp is a Magisk and KernelSU module for mobile gamers who need a stable connection. It fine-tunes Android's networking subsystem: packet prioritization, congestion control, buffer management, and DNS, all from one place.
 
----
+The goal is a set-and-forget setup: flash it once, and connection quality improves without manual configuration.
 
-## Key Features
-* 🎮 **Turbo Boost (Packet Prioritization)**
-    Give your favorite games the VIP lane. PingPimp uses `iptables` to tag your game's traffic (DSCP/TOS), ensuring your router and kernel process your game packets before anything else. Say goodbye to ping drops during a clutch.
-* 🚫 **App Jail (Isolate Mode)**
-    Sneaky background apps eating your bandwidth? Not anymore. Cut off internet access to specific user or system apps entirely with a single toggle. 
-* 🎛️ **TCP & Network Wizards**
-    Easily switch your TCP Congestion Control algorithms to match your current needs. Comes with curated presets (Game, Streaming, Download, Browsing) that actually work.
-* 🛡️ **Private DNS Lounge**
-    Secure your queries and bypass restrictions. Choose from our massive, built-in list of top-tier encrypted DNS providers (Cloudflare, AdGuard, Quad9, etc.), or easily set up your own Custom DNS.
-* 🚀 **IPv6 Nuke & Netstat Optimizer**
-    Force IPv4 routing to prevent IPv6 DNS leaks and routing overheads that cause latency spikes in-game.
-* ⚡ **Extreme QoS Application Boost**
-    Prioritizes selected apps using a smart DSCP/MARK packet tagging system. A dynamic background daemon applies traffic control (tc) to create a zero-delay VIP lane, instantly bypassing background network hogs.
+## What it does
 
----
+- Turbo boost (packet prioritization): uses `iptables` to tag game traffic (DSCP/TOS) so the kernel and router process game packets before anything else.
+- App jail (isolate mode): cuts off internet access for chosen user or system apps with a single toggle.
+- TCP and network presets: switches congestion control algorithms to match the situation, with presets for gaming, streaming, downloading, and browsing.
+- Private DNS lounge: picks from a built-in list of encrypted DNS providers (Cloudflare, AdGuard, Quad9, and others) or sets a custom one.
+- IPv6 handling: forces IPv4 routing to prevent IPv6 DNS leaks and the latency spikes they cause.
+- QoS application boost: applies DSCP/MARK tagging to selected apps; a background daemon uses traffic control (tc) to give them a clear lane past background traffic.
 
-## Technical Implementation
-The module operates by injecting specific `sysctl` parameters and modifying `/proc/sys/net/` entries during the boot process. 
+## How it works
 
-### Core Optimizations:
-- **Congestion Control:** Switches to advanced algorithms (like BBR or Cubic) depending on the kernel support to handle high-speed data more efficiently.
-- **Buffer Management:** Adjusts read/write buffers to prevent "bufferbloat," which is a common cause of high latency.
-- **Keep-Alive Tweaks:** Reduces the time the system waits to verify if a connection is still active, leading to snappier network responses.
+The module injects `sysctl` parameters and modifies `/proc/sys/net/` entries during boot.
 
----
+- Congestion control: switches to algorithms like BBR or Cubic depending on kernel support, so high-speed data moves more efficiently.
+- Buffer management: adjusts read and write buffers to fight bufferbloat, a common cause of high latency.
+- Keep-alive tuning: shortens how long the system waits to confirm a connection is alive, which makes network responses feel snappier.
 
-## User Benefits
-- **Smoother Gaming:** Experience fewer "teleporting" issues in FPS and MOBA games.
-- **Faster Browsing:** Noticeable improvement in website loading speeds.
-- **Better Stability:** More consistent connection quality even on unstable Wi-Fi or 4G/5G networks.
+## What to expect
 
----
+- Smoother gaming: fewer rubber-band moments in FPS and MOBA matches.
+- Faster browsing: pages start loading sooner.
+- More stable connections: consistent quality on unstable Wi-Fi or 4G/5G networks.
+
+Physical distance to game servers and ISP quality still apply; the module optimizes the software side only.
 
 ## Installation
-1. Download the latest `.zip` release from the [GitHub Repository](https://github.com/fuckyoustan/PingPimp).
-2. Open **Magisk** or **KernelSU** manager.
-3. Select "Install from storage" and choose the PingPimp zip file.
-4. Reboot your device to apply the network tweaks.
 
----
+1. Download the latest release from the [GitHub repository](https://github.com/fuckyoustan/PingPimp).
+2. Open Magisk or KernelSU.
+3. Choose "Install from storage" and select the PingPimp zip.
+4. Reboot to apply the network tweaks.
 
-## Final Thoughts
-1. **Hardware Limitations Apply:** While PingPimp optimizes software-side networking, physical distance to servers and ISP quality still play a role.
-2. **Universal Compatibility:** Designed to work across various Android versions and chipsets (Snapdragon, Mediatek, Exynos).
-3. **Open Source:** Transparency is key for system-level mods; the full source code is available for community audit and contribution.
+## Notes
 
----
+- Works across Android versions and chipsets, including Snapdragon, MediaTek, and Exynos.
+- Fully open source: system-level mods deserve transparency, and the code is available for anyone to audit or contribute to.

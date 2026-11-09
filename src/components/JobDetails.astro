@@ -1,8 +1,5 @@
 ---
-// component imports
-import {Badge} from "./ui/badge";
-
-// library imports
+// lib imports
 import {formatDatetime} from "../lib/utils";
 
 interface Job {
@@ -10,12 +7,12 @@ interface Job {
     company: string;
     location: string;
     startDate: string;
-    endDate: string;
+    endDate?: string;
     goals: string[];
     currentJob: boolean;
 }
 
-const {jobData} = Astro.props;  // Ensure correct typing for the props
+const {jobData} = Astro.props as { jobData: Job };
 const {
     title,
     company,
@@ -24,23 +21,28 @@ const {
     endDate,
     goals,
     currentJob,
-} = jobData as Job;
-
+} = jobData;
 ---
 
-<div class="flex flex-col gap-2">
-    <h3 class="text-xl font-bold">{title}</h3>
-    <div class="flex items-center gap-2">
-        <Badge className="bg-primary-light dark:bg-primary-dark w-fit rounded-md whitespace-nowrap	">
-            {formatDatetime(startDate)} - {currentJob ? "Present" : formatDatetime(endDate)}
-        </Badge>
-        <p class="truncate">{company}</p>
-        <span class="text-sm font-bold">/</span>
-        <p class="truncate">{location}</p>
-    </div>
-    <ul style="list-style: disc;">
-        {goals.map((goal: string) => (
-                <li>{goal}</li>
-        ))}
+<div class="relative border-l border-line pb-12 pl-8 last:pb-0">
+    <!-- Timeline node: marks each entry on the line -->
+    <span class="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border border-gold bg-paper"
+          aria-hidden="true"></span>
+
+    <p class="meta-mono">
+        {formatDatetime(startDate)} – {currentJob ? 'Present' : formatDatetime(endDate)}
+    </p>
+    <h3 class="mt-2 font-serif text-2xl tracking-tight">{title}</h3>
+    <p class="mt-1 text-sm text-gold">{company} · {location}</p>
+
+    <ul class="mt-4 flex flex-col gap-2.5 text-sm leading-relaxed text-muted">
+        {
+            goals.map((goal) => (
+                <li class="flex gap-3">
+                    <span class="mt-[9px] h-px w-4 shrink-0 bg-line" aria-hidden="true"></span>
+                    {goal}
+                </li>
+            ))
+        }
     </ul>
 </div>

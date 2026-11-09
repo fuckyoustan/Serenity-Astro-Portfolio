@@ -1,6 +1,6 @@
 ---
 title: Ultimate Thermal Destroyer
-summary: A high-risk, extreme performance module that annihilates system thermal throttling, letting your CPU and GPU unleash their full potential without mercy.
+summary: An extreme-performance module that disables Android's thermal throttling entirely. Intended for benchmark runs and cooled gaming setups, with the risks that come with that.
 tags:
   - Magisk
   - Extreme Performance
@@ -11,50 +11,35 @@ endDate: 2026-04-19
 author: Stan
 url: https://github.com/fuckyoustan/Ultimate-Thermal-Destroyer
 cover: './images/projects/destroy.png'
-ogImage: './images/projects/og-thermal-destroyer.webp'
----
-
-## Table of Contents
-1. [Overview](#overview)
-2. [Key Features](#key-features)
-3. [The "Berserk" Mode](#the-berserk-mode)
-4. [Critical Safety Warning](#critical-safety-warning)
-5. [Final Words](#final-words)
-
 ---
 
 ## Overview
-**Ultimate Thermal Destroyer** is built for users who are tired of playing it safe. If you think "safe" is just another word for "slow," this module is your new best friend. It is designed to rip off the governor’s leash and let your hardware go full berserk mode by obliterating every thermal barrier in its path.
 
----
+Ultimate Thermal Destroyer is exactly what the name says: it removes every thermal limit Android uses to protect itself. Throttling is disabled, thermal services are shut down, and the CPU and GPU run at their maximum frequencies for as long as the hardware physically can.
 
-## Key Features
-This module’s script performs the following thermal-obliterating tasks:
+Where Licking Thermal lifts limits only while a game is running, this module removes them permanently. That makes it faster, and riskier. It exists for benchmark runs and gaming sessions with serious external cooling, not for daily use.
 
-- ❌ **Kill Thermal Services:** Completely shuts down system-level thermal management services.
-- 🧨 **Property Reset:** Resets all thermal-related system properties to prevent frequency capping.
-- 🥶 **Disable Zones:** Disables all thermal zones and cooling device limits.
-- 🔓 **GPU Unlock:** Forces the GPU to stay in high-performance states.
-- 🧠 **Max Frequencies:** Maxes out CPU frequencies across all clusters.
-- 🛡️ **Bypass Protection:** Disables core thermal protections and overrides TZCPU configurations.
+## What it does
 
----
+- Kills thermal services: shuts down system-level thermal management services.
+- Resets thermal properties: clears thermal-related system properties to prevent frequency capping.
+- Disables thermal zones: removes thermal zone and cooling device limits.
+- Unlocks the GPU: forces the GPU to stay in high-performance states.
+- Maxes CPU frequencies: raises all CPU clusters to their maximum frequency.
+- Bypasses protection: disables core thermal protections and overrides TZCPU configurations.
 
-## The "Berserk" Mode
-Unlike standard performance tweaks, Ultimate Thermal Destroyer doesn't negotiate with your device's sensors. It forces the hardware to ignore heat data entirely. This ensures that even during the most demanding gaming sessions or heavy rendering tasks, your FPS remains locked at the maximum possible value without any drops or stuttering.
+## The berserk mode
 
----
+The module does not negotiate with sensors. Heat data is ignored entirely, so even during long gaming sessions or heavy rendering work, the CPU and GPU hold their maximum frequencies instead of backing off.
 
-## Warning
-> [!CAUTION]
-> **READ THIS CAREFULLY.** This module kills your device's temperature protection.
-> - **Hardware Risk:** There is a genuine risk of overheating, melting internal components, or turning your battery into a balloon.
-> - **External Cooling:** It is 100% mandatory to use a high-quality external cooler (Peltier/Fan) when this module is active.
-> - **Liability:** Use wisely and keep an eye on your temps. Everything that happens to your device is 100% on you. **You have been warned.**
+## Safety warning
 
----
+> **Caution:** read this before flashing. This module disables your device's temperature protection.
+>
+> - Overheating can damage internal components or swell the battery.
+> - External cooling (Peltier or fan) is mandatory while the module is active.
+> - Everything that happens to your device is on you. Watch your temperatures.
 
-## Final Words
-If you are ready to unleash hell and see what your SoC can truly do when the limits are removed, go forth and flash it. 💀⚔️
+## Final words
 
----
+If you want to see what your SoC does with the limits removed, and you have the cooling to handle it, the repository is linked below. For daily use, Licking Thermal is the safer choice: same speed while gaming, full protection the rest of the time.
