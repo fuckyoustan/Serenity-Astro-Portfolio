@@ -27,7 +27,7 @@ const { Content } = await render(post);
                class="link-line font-mono text-xs uppercase tracking-[0.16em] text-muted transition-colors duration-200 hover:text-ink">
                 All projects
             </a>
-            <h1 class="max-w-3xl font-serif text-4xl leading-tight tracking-tight md:text-6xl">{title}</h1>
+            <h1 class="max-w-3xl font-extrabold text-4xl leading-tight tracking-[-0.03em] md:text-6xl">{title}</h1>
             <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
                 <p class="meta-mono">{tags.join(' · ')}</p>
                 <p class="meta-mono" aria-label="Active development period">
@@ -36,7 +36,7 @@ const { Content } = await render(post);
             </div>
         </header>
 
-        <div class="overflow-hidden rounded-md border border-line" data-reveal style="--reveal-delay: 90ms">
+        <div class="overflow-hidden rounded-2xl border border-line" data-reveal style="--reveal-delay: 90ms">
             <Image transition:name={`${post.id}-image`} class="h-auto w-full object-cover" src={cover}
                    alt={`Main image for ${title}`} width={1160} decoding="async"/>
         </div>

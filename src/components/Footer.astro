@@ -2,23 +2,74 @@
 // components imports
 import Social from "./Social.astro";
 
+// data imports
+import {menu} from "../data/menu";
+
 // lib imports
 import {withBase} from "../lib/utils";
 
+// config import
+import {SOCIALS, SITE} from '@/config';
+
 const year = new Date().getFullYear();
+
+const externalLinks = SOCIALS.filter((s) => s.show).map((s) => ({
+    label: s.name,
+    url: s.url,
+}));
 ---
 
-<footer class="border-t border-line">
-    <div class="container flex flex-col items-center justify-between gap-6 py-10 md:flex-row">
-        <div class="flex flex-col items-center gap-1.5 md:items-start">
-            <a href={withBase('/')} class="font-serif text-xl tracking-tight" aria-label="Stan, back to home">
-                Stan<span class="text-gold" aria-hidden="true">.</span>
-            </a>
-            <p class="meta-mono">Android modules · Magisk · KernelSU</p>
+<footer class="px-3 pb-3 md:px-6 md:pb-6">
+    <div class="section-shell container px-6 py-10 md:px-10 md:py-12">
+        <div class="grid gap-10 md:grid-cols-[1.3fr_1fr_1fr]">
+            <div class="flex flex-col items-start gap-4">
+                <a href={withBase('/')} class="group flex items-center gap-2.5" aria-label="Stan, back to home">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-[10px] bg-ink text-sm font-extrabold tracking-tight text-paper transition-transform duration-300 group-hover:rotate-[10deg] dark:text-[#101315]"
+                          aria-hidden="true">S</span>
+                    <span class="text-[15px] font-bold tracking-tight">Stan</span>
+                </a>
+                <p class="max-w-xs text-sm leading-relaxed text-muted">
+                    Android modules for rendering, thermal, network, and battery performance.
+                    Magisk · KernelSU · Open source.
+                </p>
+            </div>
+
+            <nav aria-label="Site pages">
+                <h3 class="meta-mono mb-4">Pages</h3>
+                <ul class="flex flex-col gap-2.5">
+                    {
+                        menu.map((item) => (
+                            <li>
+                                <a href={withBase(item.href)}
+                                   class="link-line text-sm font-medium text-muted transition-colors duration-200 hover:text-ink">
+                                    {item.label}
+                                </a>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </nav>
+
+            <nav aria-label="External links">
+                <h3 class="meta-mono mb-4">Elsewhere</h3>
+                <ul class="flex flex-col gap-2.5">
+                    {
+                        externalLinks.map((link) => (
+                            <li>
+                                <a href={link.url} target="_blank" rel="noopener noreferrer"
+                                   class="link-line text-sm font-medium text-muted transition-colors duration-200 hover:text-ink">
+                                    {link.label}
+                                </a>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </nav>
         </div>
 
-        <Social/>
-
-        <p class="font-mono text-[11px] text-muted">© {year} Stan · Built with Astro</p>
+        <div class="mt-10 flex flex-col items-center justify-between gap-5 border-t border-line pt-7 md:flex-row">
+            <p class="text-[13px] text-muted">© {year} {SITE.author} · Built with Astro</p>
+            <Social/>
+        </div>
     </div>
 </footer>

@@ -21,7 +21,7 @@ const allProjects = (await getCollection('projects'))
 <Layout title="Projects | Stan" description="Every Magisk and KernelSU module I maintain, with release notes and installation guides." scrollSmooth={true}>
     <header class="pb-10 md:pb-14" data-reveal>
         <p class="label-mono mb-3">Projects</p>
-        <h1 class="font-serif text-4xl tracking-tight md:text-6xl">All modules, in one place.</h1>
+        <h1 class="font-extrabold text-4xl tracking-[-0.03em] md:text-6xl">All modules, in one place.</h1>
         <p class="mt-5 max-w-lg text-base leading-relaxed text-muted">
             {allProjects.length} Magisk and KernelSU modules covering rendering, thermal, network,
             and battery performance. Each page documents what it does and how to install it.
@@ -44,8 +44,8 @@ const allProjects = (await getCollection('projects'))
                         />
                 ))
             ) : (
-                <div class="rounded-md border border-dashed border-line py-16 text-center">
-                    <p class="font-serif text-2xl">No projects yet</p>
+                <div class="rounded-2xl border border-dashed border-line py-16 text-center">
+                    <p class="font-bold text-2xl">No projects yet</p>
                     <p class="mt-2 text-sm text-muted">Once a module is released, it appears here.</p>
                 </div>
             )

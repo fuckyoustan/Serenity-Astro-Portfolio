@@ -1,6 +1,7 @@
 ---
 // components imports
 import Social from "./Social.astro";
+import {Icon} from "astro-icon/components";
 
 // config import
 import {ME, SOCIALS} from '@/config';
@@ -9,26 +10,39 @@ const {email} = ME.contactInfo;
 const github = SOCIALS.find((s) => s.name === 'GitHub');
 ---
 
-<section class="border-t border-line py-16 md:py-28" id="contact">
-    <div class="mx-auto flex max-w-2xl flex-col items-center text-center" data-reveal>
-        <p class="label-mono mb-3">04 · Contact</p>
-        <h2 class="font-serif text-4xl leading-tight tracking-tight md:text-6xl">Have an idea for a module?</h2>
-        <p class="mt-5 max-w-md text-base leading-relaxed text-muted">
-            Bug reports, feature ideas, or questions about Android tuning: my inbox is open, and so are
-            the issue trackers on GitHub.
-        </p>
-        <div class="mt-8 flex flex-wrap justify-center gap-4">
-            <a href={`mailto:${email}`} class="btn-primary">Email me</a>
-            {
-                github && (
-                    <a href={github.url} target="_blank" rel="noopener noreferrer" class="btn-ghost">
-                        GitHub
-                    </a>
-                )
-            }
-        </div>
-        <div class="mt-8">
-            <Social/>
+<section class="pb-16 md:pb-24" id="contact">
+    <div class="section-shell relative overflow-hidden px-6 py-14 text-center md:py-20" data-reveal>
+        <!-- Soft radial glow: the one quiet ornament the section gets -->
+        <div class="pointer-events-none absolute inset-x-0 -top-40 mx-auto h-80 w-2xl max-w-full rounded-full opacity-[0.05] blur-3xl"
+             style="background: radial-gradient(closest-side, rgb(var(--c-ink)), transparent);"
+             aria-hidden="true"></div>
+
+        <div class="relative mx-auto flex max-w-xl flex-col items-center">
+            <span class="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-mutes transition-transform duration-500 hover:rotate-[8deg] hover:scale-110"
+                  aria-hidden="true">
+                <Icon name="message-2-fill" class="h-6 w-6"/>
+            </span>
+
+            <h2 class="mt-7 text-balance text-4xl font-extrabold leading-[1.08] tracking-[-0.03em] md:text-[52px]">
+                Have an idea for&nbsp;a&nbsp;module?
+            </h2>
+            <p class="mt-5 max-w-md text-balance text-base leading-relaxed text-muted">
+                Bug reports, feature ideas, or questions about Android tuning: my inbox is open, and so are
+                the issue trackers on GitHub.
+            </p>
+            <div class="mt-9 flex flex-wrap justify-center gap-3.5">
+                <a href={`mailto:${email}`} class="btn-primary">Email me</a>
+                {
+                    github && (
+                        <a href={github.url} target="_blank" rel="noopener noreferrer" class="btn-ghost">
+                            GitHub
+                        </a>
+                    )
+                }
+            </div>
+            <div class="mt-9">
+                <Social/>
+            </div>
         </div>
     </div>
 </section>

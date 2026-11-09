@@ -1,6 +1,7 @@
 ---
 // components imports
 import Social from "./Social.astro";
+import {Icon} from "astro-icon/components";
 
 // lib imports
 import {withBase} from "../lib/utils";
@@ -26,47 +27,84 @@ const profileImage = images[imagePath];
 const {email} = ME.contactInfo;
 ---
 
-<section class="grid items-center gap-12 pb-16 pt-6 md:pb-24 md:pt-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
-    <div class="flex flex-col items-start gap-6">
+<section data-parallax-zone class="relative pb-20 pt-4 md:pb-28 md:pt-8">
+    <div class="mx-auto flex max-w-3xl flex-col items-center text-center">
         <p class="label-mono" data-reveal>{ME.profession}</p>
 
-        <h1 class="text-balance font-serif text-5xl leading-[1.08] tracking-tight md:text-7xl" data-reveal
-            style="--reveal-delay: 70ms">
-            Fine-tuning Android<br/>
-            at the <em class="italic text-gold">system level</em>.
+        <h1 class="text-gradient text-gradient-shimmer mt-5 text-balance text-[44px] font-extrabold leading-[1.04] tracking-[-0.035em] sm:text-6xl md:text-[76px]"
+            data-reveal style="--reveal-delay: 70ms">
+            Fine-tuning Android at the system&nbsp;level.
         </h1>
 
-        <p class="max-w-xl text-pretty text-base leading-relaxed text-muted md:text-lg" data-reveal
+        <p class="mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted md:text-lg" data-reveal
            style="--reveal-delay: 140ms">
             I'm Stan, a self-taught developer and university student from Indonesia. My Magisk and
             KernelSU modules cover rendering performance, thermal behavior, network latency, and
             idle battery drain.
         </p>
 
-        <div class="flex flex-wrap items-center gap-4" data-reveal style="--reveal-delay: 210ms">
-            <a href={withBase('/projects')} class="btn-primary">View projects</a>
+        <div class="mt-9 flex flex-wrap items-center justify-center gap-3.5" data-reveal style="--reveal-delay: 210ms">
+            <a href={withBase('/projects')} class="btn-primary">
+                View projects
+                <Icon name="arrow-right-up-line" class="h-4 w-4" aria-hidden="true"/>
+            </a>
             <a href={`mailto:${email}`} class="btn-ghost">Email me</a>
         </div>
 
-        <div data-reveal style="--reveal-delay: 280ms">
+        <div class="mt-9" data-reveal style="--reveal-delay: 280ms">
             <Social/>
         </div>
     </div>
 
-    <div class="relative mx-auto w-56 md:w-64 lg:ml-auto lg:w-full lg:max-w-[300px]" data-reveal
-         style="--reveal-delay: 160ms">
-        <!-- Single arch window with a gold hairline: explicit aspect ratio and
-             full-bleed image so no sub-pixel gaps show inside the frame. -->
-        <div class="aspect-square overflow-hidden rounded-t-full rounded-b-lg border border-gold">
-            <Image
-                    src={profileImage()}
-                    alt="Portrait of Stan"
-                    class="h-full w-full object-cover"
-                    loading="eager"
-                    decoding="async"
-                    fetchpriority="high"
-                    width={300}
-            />
+    <!-- 3D profile card with pointer parallax chips -->
+    <div class="mx-auto mt-16 w-full max-w-[340px] px-6 md:mt-20" data-reveal style="--reveal-delay: 200ms">
+        <div data-tilt="8" class="relative">
+            <!-- Floating chips: each layer drifts at its own parallax depth -->
+            <div class="tilt-chip absolute -left-2 top-6 z-10 hidden sm:flex" data-parallax
+                 style="--parallax-x: -14px; --parallax-y: -10px;" aria-hidden="true">
+                <span class="flex items-center gap-2 rounded-full border border-line bg-surface px-3.5 py-2 text-xs font-semibold shadow-[0_8px_24px_rgba(9,11,12,0.08)]">
+                    <span class="h-1.5 w-1.5 rounded-full bg-[#078156] dark:bg-[#4ade80]"></span>
+                    Open source
+                </span>
+            </div>
+
+            <div class="tilt-chip absolute -right-4 top-16 z-10 hidden sm:flex" data-parallax
+                 style="--parallax-x: 16px; --parallax-y: 12px;" aria-hidden="true">
+                <span class="flex items-center gap-2 rounded-full border border-line bg-surface px-3.5 py-2 text-xs font-semibold shadow-[0_8px_24px_rgba(9,11,12,0.08)]">
+                    <Icon name="bash" class="h-3.5 w-3.5" aria-hidden="true"/>
+                    Magisk · KernelSU
+                </span>
+            </div>
+
+            <div class="tilt-inner tilt-lift-sm card relative p-3 shadow-[0_1px_2px_rgba(9,11,12,0.05),0_24px_64px_rgba(9,11,12,0.12)]">
+                <div class="tilt-glare" aria-hidden="true"></div>
+
+                <div class="overflow-hidden rounded-xl">
+                    <Image
+                            src={profileImage()}
+                            alt="Portrait of Stan"
+                            class="aspect-[4/5] w-full object-cover"
+                            loading="eager"
+                            decoding="async"
+                            fetchpriority="high"
+                            width={340}
+                    />
+                </div>
+
+                <div class="tilt-lift flex items-center justify-between gap-3 px-2.5 pb-1.5 pt-4">
+                    <div>
+                        <p class="text-base font-bold tracking-tight">{ME.name}</p>
+                        <p class="text-sm text-muted">{ME.handle}</p>
+                    </div>
+                    <span class="flex items-center gap-2 rounded-full border border-line px-3 py-1.5 text-[11px] font-medium text-muted">
+                        <span class="relative flex h-2 w-2" aria-hidden="true">
+                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#078156] opacity-60 dark:bg-[#4ade80]"></span>
+                            <span class="relative inline-flex h-2 w-2 rounded-full bg-[#078156] dark:bg-[#4ade80]"></span>
+                        </span>
+                        Available
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
 </section>

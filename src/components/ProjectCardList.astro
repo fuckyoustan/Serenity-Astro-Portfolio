@@ -19,13 +19,13 @@ const {title, summary, tags, cover, id, index, ...rest} = Astro.props as Props;
 ---
 
 <a href={withBase(`/projects/${id}`)} aria-label={`View project: ${title}`}
-   class="group grid grid-cols-[2.5rem_1fr_auto] items-center gap-4 border-t border-line py-6 transition-colors duration-300 last:border-b hover:bg-surface/70 md:grid-cols-[3rem_9rem_1fr_3rem] md:gap-8 md:py-8"
+   class="group grid grid-cols-[2.5rem_1fr_auto] items-center gap-4 rounded-2xl border-t border-line px-2 py-6 transition-colors duration-300 last:border-b hover:bg-mutes/50 md:grid-cols-[3rem_9rem_1fr_3rem] md:gap-8 md:px-4 md:py-8"
    {...rest}>
     <span class="font-mono text-xs text-muted" aria-hidden="true">
         {String(index).padStart(2, '0')}
     </span>
 
-    <div class="hidden h-24 w-32 overflow-hidden rounded-md md:block">
+    <div class="hidden h-24 w-32 overflow-hidden rounded-xl md:block">
         <Image
                 transition:name={`${id}-image`}
                 src={cover}
@@ -38,14 +38,14 @@ const {title, summary, tags, cover, id, index, ...rest} = Astro.props as Props;
     </div>
 
     <div class="flex min-w-0 flex-col gap-2">
-        <h2 class="truncate font-serif text-2xl tracking-tight transition-colors duration-300 group-hover:text-gold md:text-3xl">
+        <h2 class="truncate font-bold text-2xl tracking-tight transition-transform duration-300 group-hover:translate-x-1 md:text-3xl">
             {title}
         </h2>
         <p class="meta-mono truncate">{tags.join(' · ')}</p>
         <p class="hidden max-w-xl text-sm leading-relaxed text-muted lg:block">{summary}</p>
     </div>
 
-    <span class="flex h-11 w-11 items-center justify-center justify-self-end rounded-full border border-line text-muted opacity-0 transition-all duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 group-hover:border-gold group-hover:text-gold">
+    <span class="flex h-11 w-11 items-center justify-center justify-self-end rounded-full border border-line text-muted opacity-0 transition-all duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 group-hover:border-ink group-hover:text-ink">
         <Icon name="arrow-right-up-line" class="h-4 w-4" aria-hidden="true"/>
     </span>
 </a>
