@@ -48,11 +48,23 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Configure Pages (enables Pages automatically on first run)
+      # Tries to enable Pages (needs the repo setting or a PAT with Pages
+      # permission). If it cannot, the step warns and deploy is skipped —
+      # the workflow goes green again and deploys automatically once
+      # Settings -> Pages -> Source: GitHub Actions has been enabled.
+      - name: Enable Pages if not yet enabled
+        id: enable
+        continue-on-error: true
         uses: actions/configure-pages@v5
         with:
           enablement: true
 
       - name: Deploy to GitHub Pages
         id: deployment
+        if: steps.enable.outcome == 'success'
         uses: actions/deploy-pages@v4
+
+      - name: Skipped (Pages not enabled yet)
+        if: steps.enable.outcome != 'success'
+        run: |
+          echo "::warning::GitHub Pages is not enabled on this repo yet. Enable it once via Settings -> Pages -> Source: GitHub Actions, and the next push will deploy to https://fuckyoustan.github.io/Stan-Ganteng automatically. Main site: https://fuckyoustan.vercel.app"
