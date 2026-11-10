@@ -23,7 +23,7 @@ Prerequisites: Node.js 18 or higher, and npm.
 
 ```sh
 git clone https://github.com/fuckyoustan/Serenity-Astro-Portfolio.git
-cd Serenity-Astro-Portofolio
+cd Serenity-Astro-Portfolio
 npm install
 npm run dev
 ```
