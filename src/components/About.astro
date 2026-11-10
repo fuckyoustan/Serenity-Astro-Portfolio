@@ -11,25 +11,26 @@ import languages from "@/data/languages";
 import {ME} from '@/config';
 ---
 
-<section class="border-t border-line py-16 md:py-24" id="about">
-    <div class="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
-        <div class="flex flex-col items-start gap-6" data-reveal>
-            <div>
-                <p class="label-mono mb-3">02 · About</p>
-                <h2 class="font-serif text-3xl tracking-tight md:text-5xl">Self-taught, system-obsessed.</h2>
-            </div>
-            <p class="max-w-md text-base leading-relaxed text-muted">
-                {ME.aboutMe}
-            </p>
+<section class="pb-20 md:pb-28" id="about">
+    <div class="mx-auto mb-12 flex max-w-2xl flex-col items-center text-center md:mb-16" data-reveal>
+        <p class="label-mono">02 · About</p>
+        <h2 class="mt-4 text-balance text-3xl font-extrabold tracking-[-0.03em] md:text-5xl">
+            Self-taught, system-obsessed.
+        </h2>
+    </div>
 
-            <div class="mt-4 w-full max-w-md">
+    <div class="grid gap-6 md:grid-cols-2 md:gap-6">
+        <div class="card flex flex-col gap-7 p-7 md:p-8" data-reveal>
+            <p class="max-w-md text-base leading-relaxed text-muted">{ME.aboutMe}</p>
+
+            <div class="mt-auto w-full">
                 <h3 class="meta-mono mb-3">Languages</h3>
                 <ul class="flex flex-col">
                     {
                         languages.map((lang) => (
                             lang.show && (
                                 <li class="flex items-baseline justify-between gap-4 border-b border-line py-2.5 text-sm last:border-b-0">
-                                    <span>{lang.name}</span>
+                                    <span class="font-medium">{lang.name}</span>
                                     <span class="font-mono text-[11px] uppercase tracking-[0.16em] text-muted">
                                         {lang.level}
                                     </span>
@@ -41,31 +42,31 @@ import {ME} from '@/config';
             </div>
         </div>
 
-        <div class="flex flex-col gap-12">
-            <div data-reveal style="--reveal-delay: 90ms">
-                <h3 class="meta-mono mb-4">Tools I build with</h3>
-                <div class="grid grid-cols-1 gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-2">
-                    {
-                        hardSkills.map((skill) => (
-                            <div class="flex items-start gap-4 bg-surface p-5">
-                                <Icon name={skill.icon} class="mt-0.5 h-6 w-6 shrink-0 text-gold" aria-hidden="true"/>
-                                <div>
-                                    <h4 class="font-medium">{skill.name}</h4>
-                                    <p class="mt-1 text-sm leading-relaxed text-muted">{skill.description}</p>
-                                </div>
+        <div class="flex flex-col gap-6">
+            <div class="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2"
+                 data-reveal style="--reveal-delay: 90ms">
+                {
+                    hardSkills.map((skill) => (
+                        <div class="group flex items-start gap-4 bg-surface p-5 transition-colors duration-300 hover:bg-mutes">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-paper transition-transform duration-300 group-hover:scale-110">
+                                <Icon name={skill.icon} class="h-5 w-5" aria-hidden="true"/>
+                            </span>
+                            <div>
+                                <h4 class="text-[15px] font-semibold tracking-tight">{skill.name}</h4>
+                                <p class="mt-1 text-sm leading-relaxed text-muted">{skill.description}</p>
                             </div>
-                        ))
-                    }
-                </div>
+                        </div>
+                    ))
+                }
             </div>
 
-            <div data-reveal style="--reveal-delay: 160ms">
-                <h3 class="meta-mono mb-4">Working style</h3>
+            <div class="card p-5" data-reveal style="--reveal-delay: 160ms">
+                <h3 class="meta-mono mb-3.5">Working style</h3>
                 <ul class="flex flex-wrap gap-2">
                     {
                         softSkills.map((skill) => (
-                            <li class="flex items-center gap-2 rounded-sm border border-line px-3 py-2 text-xs text-muted">
-                                <Icon name={skill.icon} class="h-3.5 w-3.5 text-gold" aria-hidden="true"/>
+                            <li class="flex items-center gap-2 rounded-full border border-line px-3.5 py-2 text-xs font-medium text-muted transition-colors duration-200 hover:border-ink/25 hover:text-ink dark:hover:border-paper/25 hover:dark:text-paper">
+                                <Icon name={skill.icon} class="h-3.5 w-3.5" aria-hidden="true"/>
                                 {skill.name}
                             </li>
                         ))

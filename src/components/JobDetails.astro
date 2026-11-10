@@ -26,14 +26,14 @@ const {
 
 <div class="relative border-l border-line pb-12 pl-8 last:pb-0">
     <!-- Timeline node: marks each entry on the line -->
-    <span class="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border border-gold bg-paper"
+    <span class="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border border-ink/30 bg-paper transition-colors duration-300"
           aria-hidden="true"></span>
 
     <p class="meta-mono">
         {formatDatetime(startDate)} – {currentJob ? 'Present' : formatDatetime(endDate)}
     </p>
-    <h3 class="mt-2 font-serif text-2xl tracking-tight">{title}</h3>
-    <p class="mt-1 text-sm text-gold">{company} · {location}</p>
+    <h3 class="mt-2.5 text-2xl font-bold tracking-tight">{title}</h3>
+    <p class="mt-1.5 text-sm font-medium text-muted">{company} · {location}</p>
 
     <ul class="mt-4 flex flex-col gap-2.5 text-sm leading-relaxed text-muted">
         {

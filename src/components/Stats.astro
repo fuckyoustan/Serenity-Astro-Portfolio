@@ -5,22 +5,21 @@ import { ME } from '@/config'
 const { profileFacts } = ME
 ---
 
-<section class="border-y border-line" aria-label="Profile in numbers">
-    <dl class="grid grid-cols-1 divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+<section class="pb-16 md:pb-24" aria-label="Profile in numbers">
+    <div class="section-shell grid grid-cols-1 divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0"
+         data-reveal>
         {
-            profileFacts.map((fact, i) => (
+            profileFacts.map((fact) => (
                 <div
-                    class="flex flex-col items-center gap-1.5 py-8 sm:py-10"
-                    data-reveal
-                    style={`--reveal-delay: ${i * 90}ms`}
+                    class="group flex flex-col items-center gap-2 py-10 transition-colors duration-300 sm:py-12"
                 >
-                    <dd class="font-serif text-4xl leading-none tracking-tight md:text-5xl">
+                    <dd class="text-5xl font-extrabold leading-none tracking-[-0.03em] md:text-[56px]">
                         <span data-count={fact.value}>{fact.value.toLocaleString('en-US')}</span><span
-                        class="text-gold">+</span>
+                        class="text-muted transition-colors duration-300 group-hover:text-ink">+</span>
                     </dd>
-                    <dt class="meta-mono">{fact.description}</dt>
+                    <dt class="meta-mono mt-1.5">{fact.description}</dt>
                 </div>
             ))
         }
-    </dl>
+    </div>
 </section>

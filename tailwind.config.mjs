@@ -19,22 +19,25 @@ export default {
         },
         extend: {
             fontFamily: {
-                // Editorial serif for display type: the "elegant" half of the identity.
-                serif: ['"Playfair Display"', 'Georgia', 'serif'],
-                // Warm geometric sans for body: readable, and not an AI-default pick.
-                sans: ['Manrope', 'system-ui', '-apple-system', 'sans-serif'],
-                // Mono for micro-labels and metadata: the editorial gallery motif.
+                // Inter everywhere: the reference site's neo-grotesque identity.
+                // Display type carries the personality via weight (800) and
+                // tight tracking, not a second family.
+                sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                // Mono for micro-labels and metadata: the uppercase
+                // letter-spaced motif borrowed from the reference footer.
                 mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
             },
             colors: {
                 // Semantic tokens (RGB channels) so light and dark themes stay
-                // complete and consistent by construction.
+                // complete and consistent by construction. Values replicated
+                // from the Instafel reference (see work/instafel-analysis/tokens.json).
                 paper: 'rgb(var(--c-paper) / <alpha-value>)',
                 surface: 'rgb(var(--c-surface) / <alpha-value>)',
+                mutes: 'rgb(var(--c-mutes) / <alpha-value>)',
                 ink: 'rgb(var(--c-ink) / <alpha-value>)',
                 muted: 'rgb(var(--c-muted) / <alpha-value>)',
                 line: 'rgb(var(--c-line) / <alpha-value>)',
-                gold: 'rgb(var(--c-gold) / <alpha-value>)',
+                accent: 'rgb(var(--c-accent) / <alpha-value>)',
             },
         },
     },

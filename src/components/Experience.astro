@@ -8,11 +8,19 @@ import JobDetails from "./JobDetails.astro";
 import EduDetail from "./EduDetail.astro";
 ---
 
-<section class="border-t border-line py-16 md:py-24" id="experience">
-    <div class="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
-        <div data-reveal>
-            <p class="label-mono mb-3">03 · Experience</p>
-            <h2 class="font-serif text-3xl tracking-tight md:text-5xl">The road so far.</h2>
+<section class="pb-20 md:pb-28" id="experience">
+    <div class="mx-auto mb-12 flex max-w-2xl flex-col items-center text-center md:mb-16" data-reveal>
+        <p class="label-mono">03 · Experience</p>
+        <h2 class="mt-4 text-balance text-3xl font-extrabold tracking-[-0.03em] md:text-5xl">The road so&nbsp;far.</h2>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[0.75fr_1.25fr] lg:gap-12">
+        <div class="card h-fit p-7 lg:sticky lg:top-24" data-reveal>
+            <h3 class="meta-mono mb-3">Focus areas</h3>
+            <p class="text-sm leading-relaxed text-muted">
+                Rendering pipelines, thermal policy, network latency, and idle drain — tuned at the
+                Android framework and kernel level, shipped as flashable modules.
+            </p>
         </div>
 
         <div class="flex flex-col gap-14">
