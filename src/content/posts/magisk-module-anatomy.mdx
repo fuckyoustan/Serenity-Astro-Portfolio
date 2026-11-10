@@ -1,0 +1,169 @@
+---
+title: "Anatomy of a Magisk module"
+description: "Every file inside a Magisk module zip and what it actually does: module.prop, customize.sh, the boot scripts, the system overlay, control flags, and the updateJson update channel."
+publishDate: 2026-11-10
+tags: ["Magisk", "Android", "Module Development"]
+cover:
+  src: ./images/magisk-module-anatomy.png
+  alt: "File tree of a Magisk module showing module.prop, the installer and boot scripts, the system overlay folder, and a zygisk library"
+---
+
+import {withBase} from "@/lib/utils";
+
+Every module I publish on the [projects page]({withBase('/projects')}) is just a zip file with a specific internal layout. Once you know what each file does and when Magisk runs it, most module bugs stop being mysterious. This post walks through the whole structure the way I build it, from the zip down to the boot scripts.
+
+## Systemless first
+
+A Magisk module never writes to the `/system` partition. That is the entire point of the format. Magisk itself works by patching the boot image, and modules work by overlaying files on top of the running filesystem, a mechanism called **magic mount**. When a module is active, every file inside its `system/` folder gets mounted over the same path on the real filesystem.
+
+Three consequences follow from that design:
+
+- Removing the module removes every change it made. The system partition was never touched, so there is nothing to restore.
+- OTAs install cleanly because the partitions stay exactly as the factory shipped them.
+- Verified boot stays intact, since dm-verity still covers the real partitions.
+
+When a module "replaces" a system file, it is really just a newer copy sitting on top of the original, mounted at boot before zygote starts.
+
+## The zip layout
+
+Here is the full skeleton of a module, matching the cover image above:
+
+```text
+my-module.zip
+├── module.prop          # identity card, required
+├── customize.sh         # installer script, runs at install time
+├── post-fs-data.sh      # runs early in boot, blocking
+├── service.sh           # runs late in boot, non-blocking
+├── uninstall.sh         # runs when removed from the manager
+├── system.prop          # system properties to apply at boot
+├── sepolicy.rule        # custom SELinux rules
+├── system/              # files overlaid onto the real filesystem
+│   └── etc/
+│       └── hosts
+└── zygisk/              # optional, only for Zygisk modules
+    └── arm64-v8a.so
+```
+
+Only `module.prop` is required. Everything else is opt-in, and each part has one specific moment in the boot sequence where it runs. On a rooted device the active module lives in `/data/adb/modules/<id>/`, which is also the `$MODPATH` your scripts see.
+
+## module.prop: the identity card
+
+```text
+id=my-module
+name=My Module
+version=v1.0.0
+versionCode=100
+author=Your Name
+description=One line, shown in the Magisk app.
+```
+
+The rules that matter:
+
+- **id** has to start with a letter and may only contain letters, digits, dots, underscores, and hyphens. It is the folder name under `/data/adb/modules/`, so once you publish, it is frozen: change the id and the manager treats your update as a brand new module.
+- **versionCode** must be an integer. The manager compares version codes, not version strings, to decide whether an update exists. Forgetting to raise it is the classic reason a release "does not show up".
+- **name**, **version**, and **description** are free-form display strings.
+
+## customize.sh: the installer
+
+`customize.sh` runs inside the Magisk app when the user installs or updates the zip. At that point the module is being staged: `$MODPATH` points to `/data/adb/modules_update/<id>/`, and the files only move to the live `/data/adb/modules/<id>/` after the next reboot. That is why the manager always asks you to reboot after installing.
+
+The environment gives you everything you need to make decisions during install:
+
+```sh
+# Available variables
+$MODPATH        # staging dir for this install
+$MODID          # module id
+$ZIPFILE        # path to the zip being installed
+$ARCH           # arm, arm64, x86, or x64
+$API            # Android API level
+$MAGISK_VER     # e.g. "27.0"
+```
+
+Useful helpers, provided by the installer environment:
+
+```sh
+ui_print "installing for $ARCH"   # text shows up in the install log
+abort "unsupported Android version"  # fails the install cleanly
+set_perm_recursive "$MODPATH/system" 0 0 0755 0644
+```
+
+By default Magisk unzips everything into `$MODPATH` for you. Set `SKIPUNZIP=1` at the top of `customize.sh` and you control extraction yourself with `unzip`, which matters when the zip carries payloads you do not want installed, like source folders or CI files.
+
+## post-fs-data.sh vs service.sh
+
+These two scripts are where modules actually do their work, and the difference between them is the most common source of boot slowdowns I see in other people's modules.
+
+### post-fs-data.sh
+
+Runs right after partitions are mounted and **before zygote starts**. Boot blocks until this script finishes, so anything slow here delays the entire boot: every sleep, every binary launch, every network call. Use it only for work that genuinely must happen before any app process exists, such as mounting an image or setting up files other parts of the module depend on. If a tweak works from `service.sh`, put it there instead.
+
+### service.sh
+
+Runs in the `late_start` service stage, in parallel with the rest of boot. Nothing waits for it. This is the right place for daemons, runtime patches, and anything that depends on the framework being up. When your logic needs the system to be fully booted, wait for the property explicitly instead of guessing with a fixed sleep:
+
+```sh
+until [ "$(getprop sys.boot_completed)" = "1" ]; do
+    sleep 1
+done
+# framework is ready, apply the runtime tweak
+```
+
+## system/, system.prop, sepolicy.rule
+
+**`system/`** is the magic mount payload. A file placed at `system/etc/hosts` inside the module appears at `/etc/hosts` on the device. The folder structure mirrors the real filesystem exactly, and you never write to the real `/system` from a script.
+
+**`system.prop`** contains `key=value` system properties, applied at boot through Magisk's own property service. Typical uses are feature flags, debug props, and overriding vendor defaults.
+
+**`sepolicy.rule`** carries custom SELinux rules for contexts your module introduces. Magisk loads these very early in boot, before any of your scripts run, so by the time `post-fs-data.sh` executes the rules are already live.
+
+## Control flags
+
+Magisk controls module state through empty marker files inside the module directory, and the manager UI just toggles them. You can do the same from a shell:
+
+```sh
+touch /data/adb/modules/my-module/disable    # deactivate until reboot
+touch /data/adb/modules/my-module/remove     # uninstall on next reboot
+touch /data/adb/modules/my-module/skip_mount # keep scripts, skip the overlay
+```
+
+`disable` keeps the files on disk but stops scripts and mounting. `remove` uninstalls on the next reboot rather than immediately, which keeps the running system consistent. `skip_mount` is useful while developing: your scripts keep running while you iterate on the overlay contents.
+
+## updateJson: updates without a browser
+
+Add an `updateJson=<url>` line to `module.prop` pointing at a small JSON document:
+
+```json
+{
+  "version": "v1.1.0",
+  "versionCode": 110,
+  "zipUrl": "https://example.com/my-module-v1.1.0.zip",
+  "changelog": "https://example.com/changelog.md"
+}
+```
+
+The manager fetches the URL, compares `versionCode` with the installed one, and shows an update button when the remote number is higher. The `changelog` field accepts either a URL or a plain string. This is the whole distribution mechanism behind the "installed from update channel" experience, and it is why version codes must only ever go up.
+
+## Debugging on a real device
+
+When a module misbehaves, check in this order:
+
+1. Reproduce with `adb shell` and `su` before blaming the module. Half of all "module broken" reports are a broken root setup.
+2. Make your scripts log their own output instead of printing into the void. A single line at the top of `service.sh` is enough: `exec > "$MODPATH/service.log" 2>&1`. Read it back with `adb shell cat /data/adb/modules/my-module/service.log`.
+3. The Magisk app's own Logs screen shows the daemon log if the problem is earlier than your scripts.
+
+## One zip, three managers
+
+KernelSU and APatch both implement the Magisk module format, which is why I can ship a single zip per release. `module.prop`, the scripts, and the `system/` overlay behave the same everywhere. The part that differs between managers is the deeper integration, especially Zygisk, so if your module ships a `zygisk/` library, test it on each manager you claim to support instead of assuming parity.
+
+## The release checklist
+
+Before I tag any module release, it goes through this list:
+
+- id unchanged since the first release, versionCode strictly higher than the last one
+- nothing slow in `post-fs-data.sh`, all real work in `service.sh`
+- clean install tested on a device that never had the module before
+- update path tested over an older version, not just clean installs
+- the module logs its own actions somewhere I can read with `adb shell`
+- updateJson reachable, zipUrl actually downloads, versionCode in the JSON matches the zip
+
+That is the whole format. A zip, a manifest, two scripts at different stages of boot, and an overlay folder. Everything else is what you choose to do inside them.

@@ -62,11 +62,23 @@ const {
     <!-- Theme: applied before first paint to avoid a flash of the wrong mode -->
     <script is:inline>
         (() => {
-            const stored = localStorage.getItem('theme');
-            const dark = stored === 'dark' ||
-                (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            document.documentElement.classList.toggle('dark', dark);
-            document.documentElement.classList.add('js');
+            const isDark = () => {
+                const stored = localStorage.getItem('theme');
+                return stored === 'dark' ||
+                    (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            };
+            const apply = (root) => {
+                root.classList.toggle('dark', isDark());
+                root.classList.add('js');
+            };
+            apply(document.documentElement);
+            // Astro view transitions replace the <html> attributes with the
+            // incoming page's markup, which drops the theme class. Stamp the
+            // theme onto the new document before the swap so dark mode
+            // survives every navigation.
+            document.addEventListener('astro:before-swap', (e) => {
+                apply(e.newDocument.documentElement);
+            });
         })();
     </script>
 
@@ -86,7 +98,7 @@ const {
     Skip to content
 </a>
 <Navbar/>
-<main id="main" class="container flex-grow pt-24 md:pt-32" role="main">
+<main id="main" class="container flex-grow pt-24 pb-16 md:pt-32 md:pb-24" role="main">
     <slot/>
 </main>
 <Footer/>
@@ -100,17 +112,24 @@ const {
     // Theme toggle
     const applyTheme = (dark: boolean) => {
         document.documentElement.classList.toggle('dark', dark);
+        localStorage.setItem('theme', dark ? 'dark' : 'light');
+        syncThemeButtons();
+    };
+
+    // View transitions swap in a fresh navbar whose toggle button carries
+    // the server default label, so re-sync it after every page load.
+    const syncThemeButtons = () => {
+        const dark = document.documentElement.classList.contains('dark');
         document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
             btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
         });
     };
+    document.addEventListener('astro:page-load', syncThemeButtons);
 
     document.addEventListener('click', (e) => {
         const btn = (e.target as HTMLElement).closest('[data-theme-toggle]');
         if (!btn) return;
-        const dark = !document.documentElement.classList.contains('dark');
-        applyTheme(dark);
-        localStorage.setItem('theme', dark ? 'dark' : 'light');
+        applyTheme(!document.documentElement.classList.contains('dark'));
     });
 
     // Mobile menu
