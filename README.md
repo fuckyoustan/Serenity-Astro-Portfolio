@@ -1,6 +1,6 @@
-# Serenity Astro Portofolio
+# Serenity Astro Portfolio
 
-A free and open-source portfolio and blog template built with Astro 5, Tailwind CSS, and MDX. Created and maintained by [@fuckyoustan](https://github.com/fuckyoustan).
+A free and open-source portfolio and blog template built with Astro 5, Tailwind CSS, and MDX
 
 **Live demo:** <https://fuckyoustan.vercel.app>
 
@@ -17,17 +17,13 @@ A free and open-source portfolio and blog template built with Astro 5, Tailwind 
 - Sitemap generated at build time
 - Responsive from phone to desktop
 
-## Design
-
-Based on the [Simple Resume Portfolio](https://www.figma.com/community/file/1213010685692032886/simple-resume-portfolio) Figma design, later reworked into a monochrome system with a floating header.
-
 ## Getting started
 
 Prerequisites: Node.js 18 or higher, and npm.
 
 ```sh
-git clone https://github.com/fuckyoustan/Stan-Ganteng.git
-cd Stan-Ganteng
+git clone https://github.com/fuckyoustan/Serenity-Astro-Portfolio.git
+cd Serenity-Astro-Portofolio
 npm install
 npm run dev
 ```
@@ -129,22 +125,6 @@ SITE_URL=https://<user>.github.io ASTRO_BASE=<repo-name> npm run build
 
 `withBase()` in `src/lib/utils.ts` prefixes internal links with `ASTRO_BASE`, so the same build works from any path. Any static host can serve the `dist/` folder.
 
-## Changelog
-
-### v1.2.0 (2026-11-10)
-
-- Renamed the template to Serenity Astro Portofolio.
-- Author, homepage, and repository metadata now point to @fuckyoustan.
-
-### v1.1.0
-
-- Added the blog feature (`src/content/posts`).
-- Refactored the layout and pages.
-
-### v1.0.0
-
-- Initial release on Astro v5.
-
 ## Contributing
 
 Issues and pull requests are welcome at [github.com/fuckyoustan/Stan-Ganteng](https://github.com/fuckyoustan/Stan-Ganteng).
@@ -152,8 +132,3 @@ Issues and pull requests are welcome at [github.com/fuckyoustan/Stan-Ganteng](ht
 ## License
 
 MIT. See [LICENSE](LICENSE).
-
-## Credits
-
-- Based on [astro-simple-portfolio](https://github.com/vito8916/simple-portfolio) by Victor Alvarado.
-- Design roots: [Simple Resume Portfolio](https://www.figma.com/community/file/1213010685692032886/simple-resume-portfolio) on Figma.
