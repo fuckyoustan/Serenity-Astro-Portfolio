@@ -23,7 +23,7 @@ const allPost = (await getCollection('posts'))
 ---
 
 <Layout title="Blog | Stan" description="Writing about Android tuning and module development." scrollSmooth={false}>
-    <header class="pb-10 md:pb-14" data-reveal>
+    <header class="pb-16 md:pb-24" data-reveal>
         <p class="label-mono mb-3">Blog</p>
         <h1 class="font-extrabold text-4xl tracking-[-0.03em] md:text-6xl">Notes from the workshop.</h1>
     </header>
@@ -42,13 +42,13 @@ const allPost = (await getCollection('posts'))
                         />
                 ))
             ) : (
-                <div class="flex flex-col items-center rounded-2xl border border-dashed border-line px-6 py-16 text-center" data-reveal>
+                <div class="flex flex-col items-center rounded-2xl border border-dashed border-line px-6 py-16 text-center md:py-20" data-reveal>
                     <p class="font-bold text-2xl">No posts yet</p>
-                    <p class="mt-2 max-w-sm text-sm leading-relaxed text-muted">
+                    <p class="mt-3 max-w-sm text-sm leading-relaxed text-muted">
                         I write occasionally about Android tuning and module development. Until the first
                         post lands, the projects page tells the full story.
                     </p>
-                    <a href={withBase('/projects')} class="btn-primary mt-6">Browse projects</a>
+                    <a href={withBase('/projects')} class="btn-primary mt-8">Browse projects</a>
                 </div>
             )
         }
