@@ -143,21 +143,14 @@ const {
         if (e.key === 'Escape') closeMenu();
     });
 
-    // Navbar: glass hairline when scrolled, hides on scroll down
-    const nav = document.getElementById('site-nav');
-    let lastY = window.scrollY;
-    window.addEventListener(
-        'scroll',
-        () => {
-            if (!nav) return;
-            const y = window.scrollY;
-            const menuOpen = document.getElementById('mobile-menu')?.classList.contains('open');
-            nav.classList.toggle('is-scrolled', y > 8);
-            nav.classList.toggle('is-hidden', y > lastY && y > 240 && !menuOpen);
-            lastY = y;
-        },
-        {passive: true}
-    );
+    // Navbar: switch to the deep-glass state once the page scrolls.
+    // The header stays fixed and visible at all times — it never hides.
+    const syncNav = () => {
+        document.getElementById('site-nav')?.classList.toggle('is-scrolled', window.scrollY > 10);
+    };
+    syncNav();
+    window.addEventListener('scroll', syncNav, {passive: true});
+    document.addEventListener('astro:page-load', syncNav);
 
     // Back to top
     document.addEventListener('click', (e) => {

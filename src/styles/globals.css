@@ -130,27 +130,41 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Navbar behavior: hairline + glass when scrolled, hides on scroll    */
-/* down and returns on scroll up. The navbar is the single element     */
-/* allowed to use backdrop blur.                                       */
+/* Navbar behavior: floating glass pill. Resting state is a soft       */
+/* frosted tint (paper/80 + blur 12); scrolling deepens the blur,      */
+/* lightens the tint and lifts the pill with a soft shadow. The navbar */
+/* shell and the mobile menu card are the only elements allowed to     */
+/* use backdrop blur.                                                  */
 /* ------------------------------------------------------------------ */
-#site-nav {
-    border-bottom: 1px solid transparent;
-    transition:
-        transform 0.3s var(--ease-out),
-        background-color 0.3s linear,
-        border-color 0.3s linear;
-}
-
-#site-nav.is-scrolled {
-    background-color: rgb(var(--c-paper) / 0.86);
+.nav-shell {
+    background-color: rgb(var(--c-paper) / 0.80);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
-    border-bottom-color: rgb(var(--c-line));
+    transition:
+        background-color 0.3s linear,
+        box-shadow 0.3s linear;
 }
 
-#site-nav.is-hidden {
-    transform: translateY(-100%);
+/* Scrolled: lighter tint + deeper blur + soft lift. Without backdrop
+   support the tint stays higher so the text remains readable. */
+#site-nav.is-scrolled .nav-shell {
+    background-color: rgb(var(--c-paper) / 0.70);
+    box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.16);
+}
+
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    #site-nav.is-scrolled .nav-shell {
+        background-color: rgb(var(--c-paper) / 0.60);
+        -webkit-backdrop-filter: blur(24px);
+        backdrop-filter: blur(24px);
+    }
+}
+
+/* Mobile menu card: near-opaque glass, matching the pill */
+.menu-card {
+    background-color: rgb(var(--c-paper) / 0.95);
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
 }
 
 /* Mobile menu panel */
