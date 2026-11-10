@@ -1,0 +1,85 @@
+---
+title: "How Licking Thermal works, from service.sh to the restore pass"
+description: "A code walkthrough of Licking Thermal: the 7-second foreground watcher, the two throttle-off profiles, the HAL locker, the fake-temperature bind mounts, fast charge, and the restore path that brings every knob back."
+publishDate: 2026-11-10T11:00:00
+tags: ["Magisk", "Thermal", "Module Development"]
+cover:
+  src: ./images/how-licking-thermal-works.png
+  alt: "Runtime flow of Licking Thermal: a service.sh daemon loops every 7 seconds, checks the foreground app against the game list, and runs the off or restore scripts"
+---
+
+import {withBase} from "@/lib/utils";
+
+<a href={withBase('/projects/licking')}>Licking Thermal</a> is my per-app thermal module. Most thermal modules turn throttling off permanently and leave your phone cooking 24/7. This one watches what is on screen, lifts the limits only while a game from your list is in the foreground, and puts every knob back the moment you leave. This post walks through how that actually works, straight from the source on <a href="https://github.com/fuckyoustan/Licking-Thermal" target="_blank" rel="noopener noreferrer">GitHub</a>.
+
+If you are not familiar with how a Magisk module is put together, read <a href={withBase('/blog/magisk-module-anatomy/')}>Anatomy of a Magisk module</a> first. The short version: `customize.sh` runs at install, `service.sh` runs at boot in the late_start stage, and everything lives under `/data/adb/modules/LickingT/`.
+
+## What Android throttling actually looks like
+
+A phone has several independent layers that can slow it down when it heats up:
+
+- The kernel thermal core: `/sys/class/thermal/thermal_zone*/`, where each zone has a `policy` file that names the governor deciding what to do at each trip point.
+- Vendor drivers: Qualcomm's `msm_thermal`, MediaTek's `/proc/driver/thermal/` tables, the kgsl Adreno GPU driver's throttling knobs on Qualcomm, and mali's tmu nodes on MediaTek.
+- Battery current limiters (`bcl`) that cut CPU and GPU power when the battery gets warm or saggy.
+- The thermal HAL, a userspace process the framework talks to, plus per-vendor daemons like Xiaomi's `joyose`, which enforces Xiaomi's own per-app performance rules.
+- Modem-side power limits, exposed through `/proc/cpufreq/` and `/proc/ppm/` on MediaTek.
+
+A module that wants full performance under load has to address every layer, on every chipset family, without permanently breaking the ones that protect the hardware. That is the whole engineering problem.
+
+## Install time: what customize.sh does
+
+The installer script prints the module, device, and root environment, then does one real piece of work: it scans your installed packages against a built-in list of game package names (the source list ships in `other/list.txt`, about a screen of well-known games), keeps only the ones actually installed, and writes the result to `PornArchive/PornCategories.txt` in the module directory. That file is the module's default game list, filtered to your device. If your game is missing, you add its package name through the WebUI or by hand.
+
+Yes, `PornArchive` and the profile names are exactly what they look like. The module is fully functional and the humor is load-bearing.
+
+## Boot: the daemon
+
+`service.sh` is the module's heart. At boot it:
+
+1. Kills any previous daemon instance via a pidfile, so updates and soft reboots never leave two loops fighting.
+2. Waits for `sys.boot_completed` before touching anything, polling every 7 seconds.
+3. Clears stale vendor thermal state: `/data/vendor/thermal/config`, `thermal.dump`, and `thermal_history.dump` get removed so the vendor daemon rebuilds from scratch.
+4. Applies the saved thermal zone policy, sets up its state files, and enters the main loop.
+
+The main loop runs every 7 seconds and does three things:
+
+```sh
+PornApp="$(dumpsys activity recents 2>/dev/null | \
+    awk -F'realActivity=' '/realActivity=/ {split($2, a, "/"); print a[1]}' | sort -u)"
+```
+
+It pulls the recent tasks from `dumpsys activity recents`, extracts package names, and matches them against two lists. First `AppConfigs.txt`, which supports per-app overrides in the format `package:hal:policy:zone:agghal`, so one game can run the aggressive profile while another runs balanced. Then the plain game list. A match means the device is "in game", and the module switches its internal state from what it calls `NotHorny` to `Horny`. I did not invent these names, I just shipped them.
+
+## The two off profiles
+
+When a game is detected, the daemon runs one of two profile scripts. Which one depends on the HAL setting, global or per-app.
+
+**`amature.sh`, the balanced profile.** It flips the standard thermal knobs off: writes the selected `policy` to every thermal zone, sets `/sys/module/thermal/parameters/enabled` to 0, disables msm_thermal's enabled flags, turns off MTK's EAS thermal hints and PPM policies, lifts the kgsl GPU throttling and power-level limits, disables battery current limiting, and raises MediaTek's cooler tables from 117°C trip points to 120. It also uninstalls Xiaomi's `joyose` for the user, because joyose re-applies Xiaomi's own throttling behind your back. On MediaTek's `/proc/driver/thermal/` it rewrites the cooler tables with `no-cooler` entries, so the kernel thermal core has nothing to trip.
+
+**`MILF.sh`, the aggressive profile.** Everything the balanced profile does, plus the heavy artillery:
+
+- The HAL locker bind-mounts an empty file over every thermal and throttling library it can find in `/system/lib*` and `/vendor`, so the thermal HAL process cannot even load its own code.
+- It stops every init service whose definition mentions `thermal`, scanned out of `/system/etc/init/` and friends.
+- On MIUI it calls `miui.mqsas.IMQSNative` with a stop directive for MIUI's own thermal services.
+- It chmods 000 the mali tmu and throttling nodes on MediaTek GPUs.
+- With ZONE enabled, instead of bind-mounting a fake temperature, it chmods 000 the entire `/sys/devices/virtual/thermal` tree.
+
+The fake temperature trick deserves its own paragraph. The module creates a file containing `30000`, which in millidegrees reads as a comfortable 30°C, and bind-mounts it over every `temp` node in `/sys/devices/virtual/thermal/`. Any process that reads the temperature through that path now sees a phone that is cool as a cucumber, no matter the reality. The alternative (ZONE=1) is hiding the files entirely. Both are temporary: they are mounts, not writes, so they vanish on reboot, and the restore path unmounts them explicitly.
+
+## The restore pass
+
+When the foreground check finds no game from the list, the daemon runs `anal.sh`, and this is where most of the engineering effort went. Every value the profiles changed has a known restore value, and the script walks them all: thermal zones back to `enabled`, kernel module parameters back to 1, kgsl throttling back on, MTK cooler tables back to 117°C with real `cpu_heavy` coolers, the fake-temperature mounts unmounted in a loop until `/proc/mounts` shows none left, thermal init services restarted, joyose reinstalled, and `cmd thermalservice reset` to make the framework resync.
+
+The restore does not wait for a reboot and does not depend on the module surviving. The uninstall script kills the daemon, runs the restore pass one more time, clears any leftover bind-mounts that reference the module directory, restores the fast-charge nodes from the backup file, and puts joyose back if it removed it. Uninstalling the module leaves the phone in the same thermal state it was in before you installed it. That guarantee is the reason the module has backups like `chargebackup.txt` and `nodesnapshot.txt` sitting in the module directory at all.
+
+## Fast charge, the second mode
+
+In auto mode the daemon also watches the battery status. When charging starts and the fast-charge option is on, `Msbreewc()` backs up the current charge current, voltage, SIOP level, and temperature limit nodes to `chargebackup.txt`, then raises them: input current limits to 5.75A, voltage to 12.5V, SIOP to 100, and the warm temperature thresholds up, plus flipping every fast_charge and boost_mode node it finds to 1. When you unplug, `Siskaeee()` restores every node from the backup, value and permission mode included. The backup-then-apply pattern is deliberate: a value the module cannot restore is a value it should not touch.
+
+## How you know it is working
+
+The module reports its own state in three places. It posts a system notification on every mode transition, so you see "Aggressive mode applied for com.your.game" as it happens. It rewrites its own `module.prop` description line on every state change, so the Magisk or KernelSU app shows `[ Running ]` or `[ Balance Mode ]` right on the module row. And it logs every decision with timestamps to `LickT.log` inside the module directory, which is the first thing I ask for in a bug report.
+
+## The honest part
+
+Lifting thermal limits while gaming means the silicon runs hotter than the manufacturer planned. The dynamic design means that only happens while you are actually in the game, and the limits come back the second you leave, which is what makes daily use safe. But during the session itself, the protection is off, and that is a choice you make every time the module activates. Keep an external cooler around for long sessions, and read the warning in the repo before you flash it.

@@ -1,0 +1,91 @@
+---
+title: "Rooting explained: what it is, how to do it, and what it costs"
+description: "What root access actually means on Android, how Magisk and KernelSU grant it, the full unlock-patch-flash process, and an honest list of what you gain and what you give up."
+publishDate: 2026-11-10T12:00:00
+tags: ["Android", "Rooting", "Magisk", "Guides"]
+cover:
+  src: ./images/rooting-explained.png
+  alt: "Four-step diagram of the rooting process: unlock the bootloader, patch the boot image, flash the patched image, manage root access"
+---
+
+import {withBase} from "@/lib/utils";
+
+Every module on my <a href={withBase('/projects')}>projects page</a> starts with the same requirement: a rooted device. This post explains what that actually means, how the current rooting methods work, and what you trade for the access. If you have never rooted a phone before, read this before you flash anything.
+
+## What root actually is
+
+Android is Linux. Every app you install runs as its own unprivileged Linux user, sandboxed by the same UID-based permission system a Linux server uses. When an app wants to read your files or use the camera, it goes through the Android permission framework, and the kernel enforces the final answer.
+
+Root is user ID 0. A process running as UID 0 sits above every permission check the kernel performs. It can read and write any file, mount and unmount filesystems, change kernel parameters, and kill any process. That is the whole concept. "Rooting" a phone means getting a controlled way to run commands as UID 0, usually through a `su` binary that asks a manager app for permission the same way an app asks you for camera access.
+
+Nothing about root is hidden or exotic. It is the same `sudo` mechanics a Linux admin uses, adapted to a phone with a permission dialog.
+
+## How modern rooting works
+
+The old method, modifying the `/system` partition directly, is dead. Every current manager works systemless:
+
+- **Magisk** patches the boot image. It injects its own init into the ramdisk, starts a daemon as root, and brokers `su` requests through the Magisk app. Nothing on the system partition changes, so OTAs still install and dm-verity stays happy.
+- **KernelSU** takes root into the kernel itself. It ships as a GKI-compatible kernel or a patch to your kernel, and grants `su` in kernel space. No boot image patching needed after the kernel is in place.
+- **APatch** patches the kernel image directly, similar in spirit to KernelSU but without requiring a custom kernel build.
+
+All three speak the same module format, which is why my modules install identically on Magisk, KernelSU, and APatch. If you want to know how that format works, read <a href={withBase('/blog/magisk-module-anatomy/')}>Anatomy of a Magisk module</a>.
+
+## Step 1: unlock the bootloader
+
+Verified boot only runs code the manufacturer signed. Root is not possible while that lock is in place, so the bootloader has to go first. The exact procedure depends on the manufacturer:
+
+- On Pixels and many other devices, you enable OEM unlocking in Developer options, then run `fastboot flashing unlock` from a computer.
+- Xiaomi requires their Mi Unlock tool with a bound account and a waiting period that has historically ranged from a week to a month.
+- Samsung unlocks through Download Mode on newer models, and tripping Knox is a one-way eFuse burn: it never resets, even after you relock.
+- Some carriers sell devices with the bootloader permanently locked. There is no workaround for those.
+
+Two warnings before you start. Unlocking wipes the entire userdata partition, so back everything up first. And on devices with a hardware fuse like Knox, the trip is permanent and can affect warranty claims for anything hardware-related later, depending on your region's consumer protection laws.
+
+## Step 2: patch and flash
+
+With the bootloader open, the Magisk flow looks like this:
+
+1. Get the stock boot image for your exact firmware version. On Pixels it comes from the factory image zip; on other devices you extract it from the OTA payload. On many devices shipping with Android 13 or newer, the ramdisk lives in the `init_boot` partition instead of `boot`, so the file you need is `init_boot.img`. Using an image from a different firmware version is the classic way to end up with a bootloop.
+2. Copy the image to the phone, open the Magisk app, tap Install, then "Patch a file", and select it. Magisk writes `magisk_patched-XXXXX.img` to your Downloads folder.
+3. Boot to fastboot and flash it back where it came from:
+
+```sh
+fastboot flash boot magisk_patched-XXXXX.img      # most devices
+fastboot flash init_boot magisk_patched-XXXXX.img # Android 13+ ramdisk devices
+fastboot reboot
+```
+
+4. After reboot, install the Magisk app if it is not there yet, and verify root works:
+
+```sh
+adb shell su -c id
+# uid=0(root) gid=0(root)
+```
+
+If you see `uid=0`, the phone is rooted. The whole process takes about fifteen minutes once you have the right boot image in hand. The part that takes the longest is finding an image that matches your build number.
+
+## What you gain
+
+Concrete things root gives you, all of which I use myself:
+
+- **The Magisk module ecosystem.** Thermal management, network tuning, system UI changes, all installed and removed without touching a partition. My <a href={withBase('/projects')}>own modules</a> live here.
+- **System-wide ad blocking.** A module replaces the hosts file, so ads die at DNS resolution level for every app, not just the browser.
+- **Real backups.** Apps like Swift Backup can copy app data, not just APKs. When you switch devices or factory reset, your game saves and app states come with you.
+- **Bloatware removal.** Carrier and OEM apps can be uninstalled for real, per user profile, without a PC.
+- **Automation with teeth.** Tasker and terminal scripts can reach system files and settings that are normally off-limits, which is exactly what modules like mine are built on.
+
+## What you lose
+
+The costs are just as concrete:
+
+- **Play Integrity fails.** Google's device integrity verdict requires a locked bootloader. Many banking apps, some streaming apps, and anything using DRM-heavy content checks the verdict and refuses to run. Root-hiding setups exist and sometimes work, but it is a cat-and-mouse game that Google keeps winning. Do not buy into root expecting hiding to be reliable.
+- **Warranty complications.** Some manufacturers refuse service on devices with unlocked bootloaders regardless of the actual fault. Knox-tripped Samsungs are the strictest case. Check how your manufacturer and your local consumer law treat it before you unlock.
+- **OTA updates need care.** An OTA can fail or drop root if it overwrites your patched boot image. The safe habit is to restore the stock image, take the update, and re-patch, or use your manager's built-in OTA handling. Forget once and you get to do it the hard way.
+- **You become the security boundary.** Any app you grant root to can do anything on the device. A malicious module can brick a boot or steal everything. Root means you are personally vetting everything that runs as root, which is fine if you only install open-source modules you can read.
+- **Brick risk is real.** Flashing the wrong image, or the right image to the wrong device, can hard-brick a phone. Recoveries exist for most mistakes, but "most" is doing some work in that sentence.
+
+## Is it worth it?
+
+For me, yes. I develop and maintain modules, so root is a tool of the trade, and I accept the trade-offs knowingly. For a phone that runs your banking apps and that you cannot afford to have down for an evening of recovery work, the honest answer is that the costs may not be worth the gains.
+
+If you decide to go ahead, start with the <a href={withBase('/blog/magisk-module-anatomy/')}>module anatomy post</a> to understand what you will be installing afterward, and then the <a href={withBase('/projects')}>projects page</a> for what to install first.

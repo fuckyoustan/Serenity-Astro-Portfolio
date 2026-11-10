@@ -1,0 +1,82 @@
+---
+title: "How PingPimp works: the engine behind the dashboard"
+description: "A code walkthrough of PingPimp: the boot-time qdisc setup, the ip monitor event daemon, the network health score, adaptive MTU probing, per-app DSCP prioritization, and the smart auto mode that switches profiles by what you are doing."
+publishDate: 2026-11-10T10:00:00
+tags: ["Networking", "Module Development", "Android"]
+cover:
+  src: ./images/how-pingpimp-works.png
+  alt: "Event flow of PingPimp: service.sh sets up qdiscs at boot, the PingPimp binary applies presets and scans for games, and an ip monitor daemon feeds the engine on network changes"
+---
+
+import {withBase} from "@/lib/utils";
+
+<a href={withBase('/projects/pingpimp')}>PingPimp</a> is my network tuning module. The pitch on the <a href="https://github.com/fuckyoustan/PingPimp" target="_blank" rel="noopener noreferrer">repo</a> is one line: real iptables, real traffic control, and a WebUI, instead of the placebo build.prop edits most network modules ship. This post is the long version: how the pieces actually fit together, from boot to the daemon loop that reacts when your phone hops from Wi-Fi to mobile data.
+
+The module has three parts. A short `service.sh` bootstraps the environment. A single C binary, `PingPimp` (about 1,800 lines), does the real work. And a KernelSU WebUI dashboard drives it, writing small state files into the module directory that the binary reads. The same pattern as <a href={withBase('/blog/magisk-module-anatomy/')}>any Magisk module</a>, just with a compiler in the toolchain.
+
+## Install and boot
+
+`customize.sh` prints the usual module and device banner, then handles the one install-time decision that matters: on KernelSU and APatch, it symlinks the `PingPimp` binary into the manager's bin directory (`/data/adb/ksu/bin` or `/data/adb/ap/bin`), which puts it on the root shell PATH. On Magisk, the `system/bin` overlay does the same job through magic mount.
+
+At boot, `service.sh` runs a compact setup pass:
+
+- Appends `ap_scan=1` to `wpa_supplicant.conf` if it is missing, so the Wi-Fi stack uses the normal active-scan mode.
+- Disables Wi-Fi power save with `iw wlan0 set power_save off`, which trades a little idle battery for lower jitter on the radio.
+- Replaces the root qdisc with `fq_codel` on every network interface it finds and sets the transmit queue length to 100, so packets queue in a fair, latency-fighting scheduler instead of a dumb FIFO.
+- Flushes the routing cache, asks the Wi-Fi stack for low-latency mode, and stops the packet capture and Wi-Fi diagnostic daemons (`tcpdump`, `cnss_diag`) that write logs in the background.
+- Then hands off to the binary: `PingPimp --boot`.
+
+The boot mode resets stale state (locks, debounce counters, MTU cache entries), scans your launcher for installed games and writes them to `game_list.txt`, applies the saved preset from `preset.txt`, restores every toggle you had enabled, re-applies the app isolation rules, and finally starts the daemon. If anything was isolated, its iptables rules come back here, so a reboot never silently un-isolates an app you cut off.
+
+## The daemon: two loops
+
+The daemon is the part that makes PingPimp feel automatic, and it is really two loops.
+
+The foreground loop is `ip monitor link route address`, piped and read line by line. Every event that matters on a phone arrives through it: an interface coming up or going down (wlan, rmnet, ccmni), a VPN interface getting an address, the default route appearing or disappearing when you hop networks. Each event, after a 3-second debounce, spawns the engine and the DNS flipper.
+
+The background loop ticks every 10 seconds, but only while the screen is on, which it checks through `dumpsys power`. On every third tick it runs a periodic health check through the engine, and when smart auto mode is on it also runs the activity detector and the DNS flipper. The screen check exists so the module stops re-tuning your network while the phone is in your pocket doing nothing.
+
+## The engine: measure, score, decide
+
+The engine is one function, `cmd_engine()`, and it is the heart of the module. On every trigger it measures the network instead of guessing:
+
+- **RTT, packet loss, and jitter** from a live `ping -c 4` to 1.1.1.1.
+- **TCP retransmit rate** computed from `/proc/net/snmp`, comparing current OutSegs and RetransSegs against the previous reading, so it measures the delta rather than a lifetime average.
+- **Wi-Fi signal and band** from `iw dev <iface> link`, falling back to `dumpsys wifi`, classifying into 2.4/5/6 GHz.
+
+Those numbers go into a score from 0 to 100: RTT divided by 6, loss times 3, jitter directly, retransmits times 3, each capped, all subtracted from 100. A score under 65, or a Wi-Fi signal below -80 dBm, selects the `WEAK_NETWORK` profile. Everything else is `LOW_LATENCY`.
+
+The profile switch is deliberately sticky. A new profile has to be seen twice in a row before it is applied, tracked through a pending file. Without that hysteresis, one bad ping sample mid-game would rip the qdisc tree down and rebuild it under your feet, which is exactly the kind of churn that causes the stutter people blame on the network.
+
+Once a profile is applied, the engine:
+
+1. Probes the path MTU, binary-searching with DF-set pings between 1200 and 1472 bytes (plus the 28-byte IP and ICMP headers), and caches the result per interface and gateway so the probe runs once per network. VPN interfaces short-circuit to 1420.
+2. Sets the interface MTU and a band-aware transmit queue length.
+3. Runs the hardware tweak: RPS and XPS CPU masks on every RX and TX queue, with the mask sized to the CPU count.
+4. Rebuilds the qdisc tree if traffic control is enabled: CAKE when the kernel supports it, otherwise a three-band prio qdisc with fq_codel children, and filters that steer tagged traffic into the priority band.
+
+## App targeting: DSCP marks and isolation
+
+The WebUI's boost list ends up in `boost_apps.txt`, and `apply_boost_apps()` turns it into kernel rules. For each package it resolves the UID with `pm list packages -U`, then inserts a mangle rule:
+
+```sh
+iptables -t mangle -I OUTPUT -m owner --uid-owner 10042 -j DSCP --set-dscp 46
+```
+
+DSCP 46 is the EF, expedited forwarding, class. Your router and both endpoint kernels now see those packets as priority traffic, and the tc filters route marked packets into the fast band. If the kernel rejects DSCP rules, it falls back to a MARK tag, which the tc filters also match. Isolation is the same mechanism pointed the other way: per-UID `OUTPUT REJECT` rules that cut an app's network access entirely, restored at boot by `restore_isolated()`.
+
+This per-app targeting is the main thing separating the module from global tweaks. Boosting the game and isolating the sync service are different decisions, and they need different rules.
+
+## Smart auto: presets that follow what you do
+
+Every 10 seconds while the screen is on, the auto detector classifies the current activity. It reads the foreground app from `cmd activity stack`, checks it against `game_list.txt` and keyword categories (streaming, browsing, social), and if the receive rate passes 512 KB/s it switches to download mode regardless of the foreground app. Activity changes are debounced the same way profile changes are: two consecutive detections before a switch.
+
+Each activity maps to a sysctl preset, and the presets genuinely differ where it matters. The game preset cuts `tcp_notsent_lowat` to 2048 so queued game packets are not stuck behind a big buffer, drops SYN retries to 2 for faster connection failures, and uses small socket buffers to keep latency down. The download preset does the opposite: 16 MB max buffers, TCP ECN on, and `tcp_notsent_lowat` maxed out for throughput. When a game is detected, the module also auto-selects the best available congestion control algorithm (westwood first, then BBR, then cubic), pins network IRQs to the big cores, and renices `ksoftirqd`, `rild`, and `netd` so packet processing beats background work.
+
+## DNS and the WebUI
+
+Smart DNS handles per-network resolver choice. It detects whether you are on Wi-Fi or mobile, looks up a per-SSID map if you have one, falls back to the per-network DNS files, and applies the result through Android's Private DNS setting, so the whole system resolves through the encrypted DoT endpoint you chose. The WebUI itself is a KernelSU webroot: HTML, CSS, and JS in `webroot/`, calling the binary through the manager's root shell, with every toggle writing a plain text state file (`tc.txt`, `nic.txt`, `irq.txt`, `wifips.txt`, `conntrack.txt`, and friends) that boot and the daemon read back. No database, no daemon config protocol. Files on disk, readable with `cat`, which is also how you debug it.
+
+## What it cannot do
+
+Tuning removes device-side latency sources: bad queueing, power save timers, buffer sizes, packet capture daemons, and the priority of your game relative to background traffic. It cannot fix the physics between your phone and the tower, an oversubscribed carrier, or a router three rooms away. When someone reports that ping spikes got worse after a tweak, the first thing I check is whether the path itself changed, because the module only ever optimizes the half of the connection you carry in your pocket.
