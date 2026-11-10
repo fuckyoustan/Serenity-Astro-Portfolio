@@ -1,32 +1,28 @@
 {
-  "name": "astro-simple-portfolio",
+  "name": "serenity-astro-portofolio",
   "type": "module",
-  "version": "1.1.0",
-  "description": "free and open-source portfolio template site built with Astro.",
+  "version": "1.2.0",
+  "description": "A free and open-source portfolio and blog template built with Astro 5, Tailwind CSS, and MDX.",
   "license": "MIT",
   "private": true,
   "author": {
-    "name": "Victor Alvarado"
+    "name": "@fuckyoustan",
+    "url": "https://github.com/fuckyoustan"
   },
-  "homepage": "https://simple-portfolio.vicbox.dev",
-  "contributors": [
-    {
-      "name": "Victor Alvarado",
-      "email": "victoralvarado.dev@gmail.com",
-      "url": "https://victoralvarado.dev"
-    }
-  ],
+  "homepage": "https://fuckyoustan.vercel.app",
   "keywords": [
+    "serenity-astro-portofolio",
     "portfolio",
-    "Astro",
+    "blog",
+    "astro",
     "react",
     "tailwindcss",
     "typescript",
-    "shadCn"
+    "shadcn"
   ],
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/fuckyoustan/Stan-Ganteng.git"
   },
   "scripts": {
     "dev": "astro dev",
