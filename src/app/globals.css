@@ -1,0 +1,434 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ------------------------------------------------------------------ */
+/* Design tokens — Serenity / Instafel-inspired monochrome system     */
+/* Achromatic light theme, near-black accent, slate greys, 1px         */
+/* borders, pill CTAs. Dark theme mirrors the original site values     */
+/* (bg #090b0c, surface #161b1d). Green is reserved for status        */
+/* accents only.                                                       */
+/* ------------------------------------------------------------------ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 1rem;
+  /* Light — paper/surface white, mutes slate grey */
+  --background: #ffffff;
+  --foreground: #0a0b0c;
+  --card: #ffffff;
+  --card-foreground: #0a0b0c;
+  --popover: #ffffff;
+  --popover-foreground: #0a0b0c;
+  --primary: #101315;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f3f5;
+  --secondary-foreground: #0a0b0c;
+  --muted: #f1f3f5;
+  --muted-foreground: #566066;
+  --accent: #f1f3f5;
+  --accent-foreground: #0a0b0c;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #e4e7e9;
+  --input: #e4e7e9;
+  --ring: #0a0b0c;
+  --chart-1: #078156;
+  --chart-2: #4ade80;
+  --chart-3: #9ca8ab;
+  --chart-4: #566066;
+  --chart-5: #0a0b0c;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0a0b0c;
+  --sidebar-primary: #101315;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f3f5;
+  --sidebar-accent-foreground: #0a0b0c;
+  --sidebar-border: #e4e7e9;
+  --sidebar-ring: #0a0b0c;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
+  color-scheme: light;
+}
+
+.dark {
+  /* Dark — mirrors the original Serenity dark values */
+  --background: #090b0c;
+  --foreground: #f9fbfb;
+  --card: #161b1d;
+  --card-foreground: #f9fbfb;
+  --popover: #161b1d;
+  --popover-foreground: #f9fbfb;
+  --primary: #e3e7e8;
+  --primary-foreground: #101315;
+  --secondary: #22292b;
+  --secondary-foreground: #f9fbfb;
+  --muted: #22292b;
+  --muted-foreground: #9ca8ab;
+  --accent: #22292b;
+  --accent-foreground: #f9fbfb;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: #2a3235;
+  --input: #2a3235;
+  --ring: #f9fbfb;
+  --chart-1: #4ade80;
+  --chart-2: #078156;
+  --chart-3: #9ca8ab;
+  --chart-4: #566066;
+  --chart-5: #f9fbfb;
+  --sidebar: #161b1d;
+  --sidebar-foreground: #f9fbfb;
+  --sidebar-primary: #e3e7e8;
+  --sidebar-primary-foreground: #101315;
+  --sidebar-accent: #22292b;
+  --sidebar-accent-foreground: #f9fbfb;
+  --sidebar-border: #2a3235;
+  --sidebar-ring: #f9fbfb;
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+  section[id] {
+    scroll-margin-top: 96px;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: rgb(10 11 12 / 0.9);
+    color: #ffffff;
+  }
+  .dark ::selection {
+    background: rgb(249 251 251 / 0.9);
+    color: #090b0c;
+  }
+  a,
+  button,
+  summary,
+  label,
+  select {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  /* Long lists inside dialogs get a slim custom scrollbar */
+  .nice-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(86 96 102 / 0.4) transparent;
+  }
+  .nice-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .nice-scroll::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: rgb(86 96 102 / 0.4);
+  }
+  .dark .nice-scroll::-webkit-scrollbar-thumb {
+    background: rgb(156 168 171 / 0.4);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Mono micro-label: section markers and metadata */
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted-foreground);
+  }
+  .meta-mono {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted-foreground);
+  }
+
+  /* Animated underline that grows from the left */
+  .link-line {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    padding-bottom: 2px;
+    transition: background-size 0.4s var(--ease-out);
+  }
+  .link-line:hover,
+  .link-line:focus-visible,
+  .link-line[aria-current="page"] {
+    background-size: 100% 1px;
+  }
+
+  /* Buttons: pill CTAs — solid ink primary, bordered ghost */
+  .btn-primary {
+    display: inline-flex;
+    height: 3rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    padding-inline: 2rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    box-shadow: 0 1px 2px rgb(9 11 12 / 0.08);
+    transition: all 0.2s;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgb(9 11 12 / 0.18);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+  .btn-ghost {
+    display: inline-flex;
+    height: 3rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--foreground);
+    padding-inline: 2rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    transition: all 0.2s;
+  }
+  .btn-ghost:hover {
+    transform: translateY(-2px);
+    border-color: rgb(10 11 12 / 0.3);
+    box-shadow: 0 8px 24px rgb(9 11 12 / 0.08);
+  }
+  .dark .btn-ghost:hover {
+    border-color: rgb(249 251 251 / 0.4);
+  }
+  .btn-ghost:active {
+    transform: translateY(0);
+  }
+
+  /* Gradient display text: the hero signature */
+  .text-gradient {
+    background-image: linear-gradient(
+      100deg,
+      var(--foreground) 15%,
+      var(--muted-foreground) 80%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .text-gradient-shimmer {
+    background-size: 220% 100%;
+    animation: gradient-drift 9s ease-in-out infinite alternate;
+  }
+  @keyframes gradient-drift {
+    from {
+      background-position: 0% 50%;
+    }
+    to {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* Card primitive: 1px border, generous radius */
+  .card-st {
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+    background: var(--card);
+    transition:
+      border-color 0.3s,
+      box-shadow 0.3s,
+      transform 0.3s;
+  }
+  .card-hover:hover {
+    border-color: rgb(10 11 12 / 0.25);
+    box-shadow:
+      0 2px 4px rgb(9 11 12 / 0.05),
+      0 16px 40px rgb(9 11 12 / 0.1);
+  }
+  .dark .card-hover:hover {
+    border-color: rgb(249 251 251 / 0.25);
+    box-shadow:
+      0 2px 4px rgb(0 0 0 / 0.4),
+      0 16px 40px rgb(0 0 0 / 0.5);
+  }
+
+  /* Section container: chunked rounded wrapper */
+  .section-shell {
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    background: var(--card);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Banana cat companion — desktop-only cursor follower                  */
+/* ------------------------------------------------------------------ */
+
+#banana-cat {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  pointer-events: none;
+  will-change: transform;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out);
+}
+#banana-cat.is-visible {
+  opacity: 1;
+}
+
+#banana-cat .banana-cat-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 64%;
+  height: 10px;
+  border-radius: 9999px;
+  background: rgb(9 11 12 / 0.18);
+  filter: blur(3px);
+  transform: translateX(-50%);
+  transition: transform 0.2s, opacity 0.2s;
+}
+.dark #banana-cat .banana-cat-shadow {
+  background: rgb(0 0 0 / 0.5);
+}
+
+#banana-cat img {
+  position: relative;
+  height: 84px;
+  width: auto;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* Banana sparkle trail dots */
+.banana-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 89;
+  pointer-events: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* Wiggle burst when the pointer stops */
+@keyframes cat-settle {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  30% {
+    transform: rotate(-6deg) scale(1.04, 0.96);
+  }
+  60% {
+    transform: rotate(5deg) scale(0.97, 1.03);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+/* Speech bubble */
+#banana-cat .cat-bubble {
+  position: absolute;
+  left: 55%;
+  top: -14px;
+  white-space: nowrap;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 3px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted-foreground);
+  box-shadow: 0 4px 14px rgb(9 11 12 / 0.1);
+  opacity: 0;
+  transform: translateY(6px) scale(0.9);
+  transition:
+    opacity 0.3s var(--ease-out),
+    transform 0.3s var(--ease-out);
+}
+#banana-cat .cat-bubble.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.dark #banana-cat .cat-bubble {
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.45);
+}
