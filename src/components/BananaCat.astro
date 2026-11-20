@@ -1,0 +1,376 @@
+---
+import {withBase} from "@/lib/utils";
+
+// Asset ships in /public — withBase() keeps it working when the site
+// is served from a subpath (e.g. GitHub Pages builds with ASTRO_BASE).
+const catSrc = withBase("/banana-cat.png");
+---
+
+<!-- ------------------------------------------------------------------
+     Banana cat companion — decorative, desktop-only cursor follower.
+     Purely additive: fixed position, pointer-events none, aria-hidden.
+------------------------------------------------------------------- -->
+<div id="banana-cat" aria-hidden="true">
+    <div class="cat-bubble"></div>
+    <div class="banana-cat-shadow"></div>
+    <img src={catSrc} alt="" draggable="false" loading="eager"/>
+</div>
+
+<style is:global>
+    /* ------------------------------------------------------------------
+       Banana cat companion — desktop-only cursor follower
+    ------------------------------------------------------------------ */
+    #banana-cat {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 50;
+        pointer-events: none;
+        will-change: transform;
+        opacity: 0;
+        transition: opacity 0.5s var(--ease-out);
+    }
+
+    #banana-cat.is-visible {
+        opacity: 1;
+    }
+
+    #banana-cat .banana-cat-shadow {
+        position: absolute;
+        left: 50%;
+        bottom: -6px;
+        width: 64%;
+        height: 10px;
+        border-radius: 9999px;
+        background: rgb(10 11 12 / 0.18);
+        filter: blur(3px);
+        transform: translateX(-50%);
+        transition: transform 0.2s, opacity 0.2s;
+    }
+
+    .dark #banana-cat .banana-cat-shadow {
+        background: rgb(0 0 0 / 0.5);
+    }
+
+    #banana-cat img {
+        position: relative;
+        height: 84px;
+        width: auto;
+        -webkit-user-drag: none;
+        user-select: none;
+    }
+
+    /* Banana sparkle trail dots */
+    .banana-dot {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 49;
+        pointer-events: none;
+        width: 6px;
+        height: 6px;
+        border-radius: 9999px;
+        opacity: 0;
+        will-change: transform, opacity;
+    }
+
+    /* Wiggle burst when the pointer stops after a dash */
+    @keyframes cat-settle {
+        0% {
+            transform: rotate(0deg) scale(1);
+        }
+        30% {
+            transform: rotate(-6deg) scale(1.04, 0.96);
+        }
+        60% {
+            transform: rotate(5deg) scale(0.97, 1.03);
+        }
+        100% {
+            transform: rotate(0deg) scale(1);
+        }
+    }
+
+    /* Speech bubble */
+    #banana-cat .cat-bubble {
+        position: absolute;
+        left: 55%;
+        top: -14px;
+        white-space: nowrap;
+        border-radius: 9999px;
+        border: 1px solid rgb(var(--c-line));
+        background: rgb(var(--c-surface));
+        padding: 3px 10px;
+        font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 11px;
+        color: rgb(var(--c-muted));
+        box-shadow: 0 4px 14px rgb(10 11 12 / 0.1);
+        opacity: 0;
+        transform: translateY(6px) scale(0.9);
+        transition:
+            opacity 0.3s var(--ease-out),
+            transform 0.3s var(--ease-out);
+    }
+
+    #banana-cat .cat-bubble.is-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .dark #banana-cat .cat-bubble {
+        box-shadow: 0 4px 14px rgb(0 0 0 / 0.45);
+    }
+
+    /* Touch / coarse pointers / narrow viewports: no companion at all.
+       The animation only runs on desktop, as requested. */
+    @media (hover: none), (pointer: coarse), (max-width: 1023px) {
+        #banana-cat,
+        .banana-dot {
+            display: none !important;
+        }
+    }
+</style>
+
+<script>
+    // ------------------------------------------------------------------
+    // Banana cat companion — desktop-only cursor follower.
+    //
+    // The cat chases the cursor with spring physics: it lags a little
+    // behind, leans into its direction of travel (always glancing
+    // toward the cursor), squashes at speed, bobs when idle, leaves a
+    // trail of sparkles while sprinting, and says "meow" when you stop
+    // moving. Fully decorative — pointer-events: none, aria-hidden.
+    //
+    // Astro view transitions swap the DOM node: the loop re-grabs the
+    // fresh #banana-cat element, so the cat survives every navigation.
+    // ------------------------------------------------------------------
+
+    const BUBBLES = ["meow~", "meow!", "nyam~", "purrr", "meoooow", ":3"];
+    const DOT_COUNT = 10;
+    const DOT_COLOR = "#f5c542"; // banana yellow
+
+    // Same gate the site's own tilt/parallax effects use: real cursor only
+    const desktopPointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    interface CatState {
+        x: number;
+        y: number;
+        vx: number;
+        vy: number;
+        lean: number;
+        squash: number;
+    }
+
+    interface Refs {
+        root: HTMLElement;
+        img: HTMLImageElement;
+        bubble: HTMLElement;
+        shadow: HTMLElement;
+    }
+
+    const collect = (): Refs | null => {
+        const root = document.getElementById("banana-cat");
+        if (!root) return null;
+        const img = root.querySelector("img");
+        const bubble = root.querySelector<HTMLElement>(".cat-bubble");
+        const shadow = root.querySelector<HTMLElement>(".banana-cat-shadow");
+        if (!img || !bubble || !shadow) return null;
+        return {root, img, bubble, shadow};
+    };
+
+    let refs = collect();
+
+    // Sparkle pool — appended to <body>, re-attached after view-transition swaps
+    const dots: HTMLDivElement[] = [];
+    const dotLife: number[] = Array.from({length: DOT_COUNT}, () => 0);
+    const dotBorn: number[] = Array.from({length: DOT_COUNT}, () => 0);
+    const dotX: number[] = Array.from({length: DOT_COUNT}, () => 0);
+    const dotY: number[] = Array.from({length: DOT_COUNT}, () => 0);
+    for (let i = 0; i < DOT_COUNT; i++) {
+        const d = document.createElement("div");
+        d.className = "banana-dot";
+        d.style.background = `radial-gradient(circle, #fff6cc 0%, ${DOT_COLOR} 55%, transparent 75%)`;
+        document.body.appendChild(d);
+        dots.push(d);
+    }
+
+    const cat: CatState = {x: -200, y: -200, vx: 0, vy: 0, lean: 0, squash: 0};
+
+    let targetX = -200;
+    let targetY = -200;
+    let started = false;
+    let lastSpawn = 0;
+    let idleSince = performance.now();
+    let bubbleUntil = 0;
+    let settleUntil = 0;
+    let wasFast = false;
+    let bubbleTimer = 0;
+    let raf = 0;
+    let prev = performance.now();
+    let bound = false;
+
+    const onMouseMove = (e: MouseEvent) => {
+        targetX = e.clientX;
+        targetY = e.clientY;
+        if (!started) {
+            started = true;
+            cat.x = targetX + 64;
+            cat.y = targetY + 44;
+        }
+    };
+    const onLeave = () => refs?.root.classList.remove("is-visible");
+    const onEnter = () => {
+        if (started) refs?.root.classList.add("is-visible");
+    };
+
+    const loop = (now: number) => {
+        raf = requestAnimationFrame(loop);
+        const dt = Math.min(0.05, (now - prev) / 1000) || 0.016;
+        prev = now;
+
+        // View transitions replace the DOM node — re-grab it if detached
+        if (!refs || !refs.root.isConnected) refs = collect();
+        if (!refs) return;
+
+        // The cat parks below-right of the cursor, like a companion
+        const tx = targetX + 64;
+        const ty = targetY + 44;
+
+        // Spring chase (frame-rate independent exponential smoothing)
+        const follow = 1 - Math.pow(1 - 0.14, dt * 60);
+        const nx = cat.x + (tx - cat.x) * follow;
+        const ny = cat.y + (ty - cat.y) * follow;
+        cat.vx = (nx - cat.x) / dt;
+        cat.vy = (ny - cat.y) / dt;
+        cat.x = nx;
+        cat.y = ny;
+
+        const speed = Math.hypot(cat.vx, cat.vy);
+        const idle = speed < 60;
+
+        // Lean into the travel direction — the cat keeps glancing at the cursor
+        const targetLean = Math.max(-24, Math.min(24, cat.vx * 0.028));
+        cat.lean += (targetLean - cat.lean) * Math.min(1, dt * 10);
+
+        // Squash & stretch proportional to speed
+        const targetSquash = Math.min(0.14, speed / 9000);
+        cat.squash += (targetSquash - cat.squash) * Math.min(1, dt * 8);
+
+        // Idle: gentle breathing bob + occasional meow
+        let bobY = 0;
+        let bobRot = 0;
+        if (idle && started) {
+            bobY = Math.sin(now / 460) * 2.6;
+            bobRot = Math.sin(now / 460) * 2.4;
+            if (now - idleSince > 7200 && now > bubbleUntil) {
+                refs.bubble.textContent = BUBBLES[Math.floor(Math.random() * BUBBLES.length)];
+                refs.bubble.classList.add("is-visible");
+                bubbleUntil = now + 2400;
+                window.clearTimeout(bubbleTimer);
+                bubbleTimer = window.setTimeout(() => refs?.bubble.classList.remove("is-visible"), 2400);
+                idleSince = now;
+            }
+        } else {
+            idleSince = now;
+        }
+
+        // Landing wiggle after a fast dash
+        if (speed > 900) wasFast = true;
+        else if (wasFast && idle) {
+            wasFast = false;
+            settleUntil = now + 420;
+            refs.img.style.animation = "none";
+            void refs.img.offsetWidth; // restart the keyframe
+            refs.img.style.animation = "cat-settle 0.42s cubic-bezier(0.22,1,0.36,1)";
+        }
+
+        const settleActive = now < settleUntil;
+
+        refs.root.style.transform = `translate3d(${cat.x.toFixed(1)}px, ${(cat.y + bobY).toFixed(1)}px, 0)`;
+
+        if (!settleActive) {
+            const sx = (1 + cat.squash).toFixed(3);
+            const sy = (1 - cat.squash).toFixed(3);
+            refs.img.style.transform = `rotate(${(cat.lean + bobRot).toFixed(2)}deg) scale(${sx}, ${sy})`;
+        }
+
+        // Shadow breathes with the bob
+        const lift = 1 - Math.max(0, bobY) / 6;
+        refs.shadow.style.transform = `translateX(-50%) scale(${(0.9 * lift).toFixed(3)})`;
+        refs.shadow.style.opacity = String(0.7 * lift);
+
+        // Sparkle trail while sprinting
+        if (speed > 700 && now - lastSpawn > 70) {
+            lastSpawn = now;
+            for (let i = 0; i < DOT_COUNT; i++) {
+                if (dotLife[i] <= 0) {
+                    dotLife[i] = 0.75;
+                    dotBorn[i] = now;
+                    dotX[i] = cat.x + 20 + (Math.random() * 26 - 13);
+                    dotY[i] = cat.y + 30 + (Math.random() * 26 - 13);
+                    if (!dots[i].isConnected) document.body.appendChild(dots[i]);
+                    break;
+                }
+            }
+        }
+        for (let i = 0; i < DOT_COUNT; i++) {
+            if (dotLife[i] > 0) {
+                dotLife[i] -= dt;
+                const age = (now - dotBorn[i]) / 750;
+                const scale = 1 - Math.min(1, Math.max(0, age));
+                const d = dots[i];
+                d.style.opacity = String(Math.max(0, scale) * 0.9);
+                d.style.transform = `translate3d(${dotX[i].toFixed(1)}px, ${dotY[i].toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
+                if (dotLife[i] <= 0) d.style.opacity = "0";
+            }
+        }
+
+        if (started) refs.root.classList.add("is-visible");
+    };
+
+    const attach = () => {
+        if (bound) return;
+        bound = true;
+        window.addEventListener("mousemove", onMouseMove, {passive: true});
+        document.addEventListener("mouseleave", onLeave);
+        document.addEventListener("mouseenter", onEnter);
+        if (!raf) {
+            prev = performance.now();
+            raf = requestAnimationFrame(loop);
+        }
+    };
+
+    const detach = () => {
+        if (!bound) return;
+        bound = false;
+        window.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseleave", onLeave);
+        document.removeEventListener("mouseenter", onEnter);
+        if (raf) {
+            cancelAnimationFrame(raf);
+            raf = 0;
+        }
+        refs?.root.classList.remove("is-visible");
+    };
+
+    // Enable only for desktop pointers that allow motion
+    const sync = () => {
+        if (desktopPointer.matches && !reducedMotion.matches) attach();
+        else detach();
+    };
+    desktopPointer.addEventListener("change", sync);
+    reducedMotion.addEventListener("change", sync);
+
+    // View transitions swap in a fresh #banana-cat node: re-bind to it
+    // (and re-attach the sparkle dots to the new document body).
+    const bind = () => {
+        refs = collect();
+        dots.forEach((d) => {
+            if (!d.isConnected) document.body.appendChild(d);
+        });
+        if (refs && started) refs.root.classList.add("is-visible");
+    };
+    document.addEventListener("astro:page-load", bind);
+
+    sync();
+</script>
